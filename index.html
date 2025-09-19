@@ -43,7 +43,21 @@
         .search-container { position: relative; padding: 0 30px 30px 30px; background: #f8f9fa; }
         #searchInput { width: 100%; padding: 18px 20px; font-size: 16px; border: 2px solid #3498db; border-radius: 30px; outline: none; box-sizing: border-box; box-shadow: 0 4px 10px rgba(52,152,219,0.1); }
         #searchInput:focus { border-color: #2980b9; box-shadow: 0 4px 15px rgba(52,152,219,0.2); }
-        .autocomplete-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 15px 15px; max-height: 250px; overflow-y: auto; z-index: 1000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .autocomplete-dropdown { 
+            position: absolute; 
+            top: 100%; 
+            left: 30px; 
+            right: 30px; 
+            background: white; 
+            border: 1px solid #ddd; 
+            border-top: none; 
+            border-radius: 0 0 15px 15px; 
+            max-height: 250px; 
+            overflow-y: auto; 
+            z-index: 1000; 
+            display: none; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+        }
         .autocomplete-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; }
         .autocomplete-item:hover { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); }
         .search-buttons { margin-top: 15px; text-align: center; }
@@ -81,10 +95,10 @@
         .pdf-btn { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; }
         .xlsx-btn { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; }
         .select-all-btn { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; }
-        .client-checkboxes { padding: 20px 30px; background: white; border-bottom: 1px solid #eee; display: flex; flex-wrap: wrap; gap: 10px; }
+        .client-checkboxes { padding: 20px 30px; background: white; border-bottom: 1px solid #eee; display: flex; flex-wrap: wrap; gap: 10px; z-index: 1; position: relative; }
         .client-checkboxes label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-weight: 400; color: #555; }
         .client-checkboxes input[type="checkbox"] { width: 16px; height: 16px; }
-        .select-all-container { padding: 15px 30px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
+        .select-all-container { padding: 15px 30px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; z-index: 1; position: relative; }
         .select-all-container label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; color: #34495e; }
         .select-all-container input[type="checkbox"] { width: 18px; height: 18px; }
         .pdf-preview { display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
@@ -97,6 +111,7 @@
             .client-cards { grid-template-columns: 1fr; gap: 15px; }
             .results-section, .search-container, .import-section { padding: 20px; }
             .pdf-btn, .xlsx-btn, .select-all-btn { display: block; margin: 0 auto 15px; width: 100%; }
+            .autocomplete-dropdown { left: 20px; right: 20px; }
         }
     </style>
 </head>
@@ -104,7 +119,7 @@
     <div class="container">
         <div class="header">
             <h1>Consulta de Títulos por Cliente</h1>
-	    <h1>Quitados ou em aberto (vencidos ou a vencer) </h1>
+            <h1>Quitados ou em aberto (vencidos ou a vencer) </h1>
             <p>Importe sua planilha e consulte os títulos de seus clientes </p>
         </div>
 
@@ -177,7 +192,9 @@
             ["CLIENTE", "VENCIMENTO", "DESCRIÇÃO", "VALOR", "LIQUIDAÇÃO", "EMPRESA"],
             ["HOSPITAL SAMCORDIS LTDA", "2025-09-01 00:00:00", "NF 13879", 5450, "2025-09-02 00:00:00", "Empresa A de Distribuição Médica Ltda"],
             ["CASA DE SAUDE NOSSA SENHORA AUXILIADORA AS", "2025-09-01 00:00:00", "NF 14499", "4.200,00", "2025-09-08 00:00:00", "Empresa B Hospitalar e Serviços"],
-            ["INSTITUICAO ADVENTISTA", "2025-09-01", "NF 14287", "12.753,00", "", "Empresa C"]
+            ["INSTITUICAO ADVENTISTA", "2025-09-01", "NF 14287", "12.753,00", "", "Empresa C"],
+            ["LAB. BLESSING ANALISES CLIN E ANAT PATOLOGICA LTDA", "2025-09-15", "NF 12345", "8.500,00", "", "Empresa D"],
+            ["LABORATORIO BLESSING ANALISES CLIN E ANAT. PAT LTDA", "2025-09-20", "NF 12346", "7.200,00", "", "Empresa E"]
         ];
 
         let data = [];
@@ -352,17 +369,44 @@
             document.getElementById('recordsLoaded').textContent = loadedCount;
         }
 
-        function calculateTotalByCategory(titles, onlyOverdue, showFuture, showPaid) {
+        function calculateTotalByCategory(titles) {
             let overdue = 0, future = 0, paid = 0;
+            const onlyOverdue = document.getElementById('onlyOverdue').checked;
+            const showFuture = document.getElementById('showFuture').checked;
+            const showPaid = document.getElementById('showPaid').checked;
+            
             titles.forEach(title => {
                 const dueDate = serialToDate(title.venc);
                 const liqDate = serialToDate(title.liq);
-                if (!title.liq || !liqDate) {
-                    if (dueDate && dueDate <= currentDate) overdue += Number(title.valor || 0);
-                    else if (dueDate && dueDate > currentDate) future += Number(title.valor || 0);
-                    else overdue += Number(title.valor || 0); // se não tem data, considerar vencido (por segurança)
-                } else if (showPaid) paid += Number(title.valor || 0);
+                const isPaid = title.liq && liqDate;
+                
+                // Se o título está quitado
+                if (isPaid) {
+                    if (showPaid) {
+                        paid += Number(title.valor || 0);
+                    }
+                } 
+                // Se o título está em aberto
+                else {
+                    if (dueDate) {
+                        if (dueDate <= currentDate) {
+                            if (onlyOverdue) {
+                                overdue += Number(title.valor || 0);
+                            }
+                        } else {
+                            if (showFuture) {
+                                future += Number(title.valor || 0);
+                            }
+                        }
+                    } else {
+                        // Se não tem data de vencimento, considerar como vencido
+                        if (onlyOverdue) {
+                            overdue += Number(title.valor || 0);
+                        }
+                    }
+                }
             });
+            
             return { overdue, future, paid, general: overdue + future + paid };
         }
 
@@ -492,6 +536,19 @@
             const showPaid = document.getElementById('showPaid').checked;
             const selected = getSelectedClients();
 
+            // Se nenhum filtro estiver selecionado, zerar tudo
+            if (!onlyOverdue && !showFuture && !showPaid) {
+                document.getElementById('clientsFound').textContent = '0';
+                document.getElementById('clientsCount').textContent = '0';
+                document.getElementById('totalOverdue').textContent = 'R$ 0,00';
+                document.getElementById('totalFuture').textContent = 'R$ 0,00';
+                document.getElementById('totalPaid').textContent = 'R$ 0,00';
+                document.getElementById('totalGeneral').textContent = 'R$ 0,00';
+                document.getElementById('summary').style.display = 'none';
+                document.getElementById('results').innerHTML = '<div class="no-results">Nenhum filtro selecionado<br>Selecione pelo menos um filtro para visualizar os resultados.</div>';
+                return;
+            }
+
             let filteredClients = {};
             let clientCount = 0;
 
@@ -499,25 +556,34 @@
                 if (clients[client]) {
                     let clientTitles = clients[client].titles.slice();
 
+                    // Filtrar títulos com base nos filtros selecionados
                     clientTitles = clientTitles.filter(title => {
                         const dueDate = serialToDate(title.venc);
-                        if (!dueDate) return false;
-                        const isOverdueOrToday = dueDate <= currentDate;
-                        const isFuture = dueDate > currentDate;
-
-                        if (onlyOverdue && !showFuture) return isOverdueOrToday;
-                        else if (showFuture && !onlyOverdue) return isFuture;
-                        else return true;
+                        const liqDate = serialToDate(title.liq);
+                        const isPaid = title.liq && liqDate;
+                        
+                        // Se o título está quitado
+                        if (isPaid) {
+                            return showPaid;
+                        } 
+                        // Se o título está em aberto
+                        else {
+                            if (dueDate) {
+                                if (dueDate <= currentDate) {
+                                    return onlyOverdue;
+                                } else {
+                                    return showFuture;
+                                }
+                            } else {
+                                // Se não tem data de vencimento, considerar como vencido
+                                return onlyOverdue;
+                            }
+                        }
                     });
 
-                    let openTitles = clientTitles.filter(isTitleOpen);
-                    let paidTitles = showPaid ? clientTitles.filter(title => !isTitleOpen(title)) : [];
-
-                    let displayTitles = openTitles.concat(paidTitles);
-
-                    if (displayTitles.length > 0) {
-                        const totals = calculateTotalByCategory(displayTitles, onlyOverdue, showFuture, showPaid);
-                        filteredClients[client] = { titles: displayTitles, totals };
+                    if (clientTitles.length > 0) {
+                        const totals = calculateTotalByCategory(clientTitles);
+                        filteredClients[client] = { titles: clientTitles, totals };
                         clientCount++;
                     }
                 }
@@ -582,29 +648,25 @@
                         const status = isOpen ? 'Aberto' : 'Quitado';
                         const className = isOpen ? '' : 'paid-title';
                         html += `<tr class="${className}">
-                            <td style="font-size: 0.9em;">${title.desc}</td>
-                            <td style="font-size: 0.85em; color:#34495e;">${title.emissora}</td>
+                            <td>${title.desc}</td>
+                            <td>${title.emissora || 'N/A'}</td>
                             <td>${dueStr}</td>
-                            <td style="font-weight: 500; color: ${isOpen ? '#27ae60' : '#6c757d'};">${valorStr}</td>
+                            <td>${valorStr}</td>
                             <td>${status}</td>
                         </tr>`;
                     });
 
-                html += `</tbody></table>
-                </div>`;
-                html += `<div class="client-totals">`;
-                const totals = filteredClients[client].totals;
-                html += `<div class="total-card total-overdue">Vencidos: ${totals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>`;
-                html += `<div class="total-card total-future">A Vencer: ${totals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>`;
-                if (document.getElementById('showPaid').checked) {
-                    html += `<div class='total-card total-paid'>Quitados: ${totals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>`;
-                }
-                html += `<div class='total-card total-general'>Total Geral: ${totals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>`;
+                html += `</tbody></table>`;
                 html += `</div>`;
+                html += `<div class="client-totals">
+                    <div class="total-card total-overdue">Vencidos: ${filteredClients[client].totals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                    <div class="total-card total-future">A Vencer: ${filteredClients[client].totals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                    <div class="total-card total-paid">Quitados: ${filteredClients[client].totals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                    <div class="total-card total-general">Total: ${filteredClients[client].totals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                </div>`;
                 html += `</div>`;
                 colorIndex++;
             }
-
             html += '</div>';
             resultsDiv.innerHTML = html;
         }
@@ -706,6 +768,12 @@
             const showPaid = document.getElementById('showPaid').checked;
             const selected = getSelectedClients();
 
+            // Verificar se há pelo menos um filtro selecionado
+            if (!onlyOverdue && !showFuture && !showPaid) {
+                alert('Selecione pelo menos um filtro para gerar o PDF.');
+                return;
+            }
+
             // Configurações iniciais
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(22);
@@ -720,6 +788,15 @@
             doc.setTextColor(0, 0, 0);
             doc.text(`Data da Consulta: ${currentDate.toLocaleDateString('pt-BR')}`, 20, yPos);
             yPos += 7;
+            
+            // Informar filtros aplicados
+            let filtersText = 'Filtros: ';
+            if (onlyOverdue) filtersText += 'Vencidos ';
+            if (showFuture) filtersText += 'A Vencer ';
+            if (showPaid) filtersText += 'Quitados ';
+            doc.text(filtersText, 20, yPos);
+            yPos += 7;
+            
             if (query) {
                 doc.text(`Busca: ${query}`, 20, yPos);
                 yPos += 7;
@@ -748,22 +825,33 @@
 
                 let clientTitles = clients[client].titles.filter(title => {
                     const dueDate = serialToDate(title.venc);
-                    if (!dueDate) return false;
-                    const isOverdueOrToday = dueDate <= currentDate;
-                    const isFuture = dueDate > currentDate;
-
-                    if (onlyOverdue && !showFuture) return isOverdueOrToday;
-                    else if (showFuture && !onlyOverdue) return isFuture;
-                    else return true;
+                    const liqDate = serialToDate(title.liq);
+                    const isPaid = title.liq && liqDate;
+                    
+                    // Se o título está quitado
+                    if (isPaid) {
+                        return showPaid;
+                    } 
+                    // Se o título está em aberto
+                    else {
+                        if (dueDate) {
+                            if (dueDate <= currentDate) {
+                                return onlyOverdue;
+                            } else {
+                                return showFuture;
+                            }
+                        } else {
+                            // Se não tem data de vencimento, considerar como vencido
+                            return onlyOverdue;
+                        }
+                    }
                 });
 
-                let openTitles = clientTitles.filter(isTitleOpen);
-                let paidTitles = showPaid ? clientTitles.filter(title => !isTitleOpen(title)) : [];
-                let displayTitles = openTitles.concat(paidTitles);
+                let displayTitles = clientTitles;
 
                 if (displayTitles.length === 0) continue;
 
-                const totals = calculateTotalByCategory(displayTitles, onlyOverdue, showFuture, showPaid);
+                const totals = calculateTotalByCategory(displayTitles);
 
                 globalTotals.overdue += totals.overdue;
                 globalTotals.future += totals.future;
@@ -788,7 +876,7 @@
                 yPos += 8;
             }
             
-            if (globalTotals.paid > 0 && showPaid) {
+            if (globalTotals.paid > 0) {
                 doc.setTextColor(108, 117, 125);
                 doc.text(`Total Quitados: ${globalTotals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
                 yPos += 8;
@@ -808,22 +896,33 @@
 
                 let clientTitles = clients[client].titles.filter(title => {
                     const dueDate = serialToDate(title.venc);
-                    if (!dueDate) return false;
-                    const isOverdueOrToday = dueDate <= currentDate;
-                    const isFuture = dueDate > currentDate;
-
-                    if (onlyOverdue && !showFuture) return isOverdueOrToday;
-                    else if (showFuture && !onlyOverdue) return isFuture;
-                    else return true;
+                    const liqDate = serialToDate(title.liq);
+                    const isPaid = title.liq && liqDate;
+                    
+                    // Se o título está quitado
+                    if (isPaid) {
+                        return showPaid;
+                    } 
+                    // Se o título está em aberto
+                    else {
+                        if (dueDate) {
+                            if (dueDate <= currentDate) {
+                                return onlyOverdue;
+                            } else {
+                                return showFuture;
+                            }
+                        } else {
+                            // Se não tem data de vencimento, considerar como vencido
+                            return onlyOverdue;
+                        }
+                    }
                 });
 
-                let openTitles = clientTitles.filter(isTitleOpen);
-                let paidTitles = showPaid ? clientTitles.filter(title => !isTitleOpen(title)) : [];
-                let displayTitles = openTitles.concat(paidTitles);
+                let displayTitles = clientTitles;
 
                 if (displayTitles.length === 0) continue;
 
-                const totals = calculateTotalByCategory(displayTitles, onlyOverdue, showFuture, showPaid);
+                const totals = calculateTotalByCategory(displayTitles);
 
                 if (yPos > 250) {
                     doc.addPage();
@@ -952,7 +1051,7 @@
                 }
                 
                 // Quitados
-                if (totals.paid > 0 && showPaid) {
+                if (totals.paid > 0) {
                     doc.setFillColor(108, 117, 125);
                     doc.roundedRect(108, yPos, 87, 8, 2, 2, 'F');
                     doc.text(`Quitados: ${totals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 113, yPos + 5);
@@ -992,7 +1091,7 @@
                 yPos += 8;
             }
             
-            if (globalTotals.paid > 0 && showPaid) {
+            if (globalTotals.paid > 0) {
                 doc.setTextColor(108, 117, 125);
                 doc.text(`Total Quitados: ${globalTotals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
                 yPos += 8;
@@ -1028,6 +1127,12 @@
             const showPaid = document.getElementById('showPaid').checked;
             let allData = [];
 
+            // Verificar se há pelo menos um filtro selecionado
+            if (!onlyOverdue && !showFuture && !showPaid) {
+                alert('Selecione pelo menos um filtro para gerar o XLSX.');
+                return;
+            }
+
             allData.push(['Cliente', 'Descrição', 'Empresa', 'Vencimento', 'Valor', 'Status']);
 
             for (let client of selected) {
@@ -1035,20 +1140,29 @@
 
                 let clientTitles = clients[client].titles.filter(title => {
                     const dueDate = serialToDate(title.venc);
-                    if (!dueDate) return false;
-                    const isOverdueOrToday = dueDate <= currentDate;
-                    const isFuture = dueDate > currentDate;
-
-                    if (onlyOverdue && !showFuture) return isOverdueOrToday;
-                    else if (showFuture && !onlyOverdue) return isFuture;
-                    else return true;
+                    const liqDate = serialToDate(title.liq);
+                    const isPaid = title.liq && liqDate;
+                    
+                    // Se o título está quitado
+                    if (isPaid) {
+                        return showPaid;
+                    } 
+                    // Se o título está em aberto
+                    else {
+                        if (dueDate) {
+                            if (dueDate <= currentDate) {
+                                return onlyOverdue;
+                            } else {
+                                return showFuture;
+                            }
+                        } else {
+                            // Se não tem data de vencimento, considerar como vencido
+                            return onlyOverdue;
+                        }
+                    }
                 });
 
-                let openTitles = clientTitles.filter(isTitleOpen);
-                let paidTitles = showPaid ? clientTitles.filter(title => !isTitleOpen(title)) : [];
-                let displayTitles = openTitles.concat(paidTitles);
-
-                displayTitles.forEach(title => {
+                clientTitles.forEach(title => {
                     const dueStr = serialToDate(title.venc) ? serialToDate(title.venc).toLocaleDateString('pt-BR') : 'N/A';
                     const valorNum = Number(title.valor || 0);
                     const status = isTitleOpen(title) ? 'Aberto' : 'Quitado';
@@ -1068,7 +1182,7 @@
                 { wch: 12 }  // Status
             ];
 
-            // Tentar aplicar wrapText nas colunas Descrição e Empresa
+            // Tentar aplicar wrapText nas colunas Descrição and Empresa
             try {
                 for (let r = 1; r < allData.length; r++) {
                     const descCellAddr = `B${r + 1}`;
@@ -1115,8 +1229,9 @@
             }
         });
 
-        // Inicializar com dados de exemplo (pode ser substituído pelo importFile)
-        processData();
+        // Adicionei exemplos de dados para demonstração
+        window.selectClient = selectClient;
+        window.downloadPDF = downloadPDF;
     </script>
 </body>
 </html>
