@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Dashboard de Títulos em Aberto</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Roboto', sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            color: #333; 
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            overflow: hidden;
+        }
+        .header { 
+            text-align: center; 
+            padding: 40px 20px; 
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); 
+            color: white; 
+            margin: 0;
+        }
+        .header h1 { font-size: 2.5em; margin: 0 0 10px 0; font-weight: 300; }
+        .header p { font-size: 1.2em; margin: 0; opacity: 0.9; }
+        .import-section { padding: 30px; background: white; border-bottom: 1px solid #eee; }
+        .import-section h3 { color: #34495e; margin-top: 0; }
+        .file-input { margin-bottom: 15px; }
+        .file-input label { display: block; margin-bottom: 8px; font-weight: 500; color: #555; }
+        #fileInput { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px; }
+        #fileInput:focus { border-color: #3498db; }
+        .search-container { position: relative; padding: 0 30px 30px 30px; background: #f8f9fa; }
+        #searchInput { width: 100%; padding: 18px 20px; font-size: 16px; border: 2px solid #3498db; border-radius: 30px; outline: none; box-sizing: border-box; box-shadow: 0 4px 10px rgba(52,152,219,0.1); }
+        #searchInput:focus { border-color: #2980b9; box-shadow: 0 4px 15px rgba(52,152,219,0.2); }
+        .autocomplete-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 15px 15px; max-height: 250px; overflow-y: auto; z-index: 1000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .autocomplete-item { padding: 15px 20px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.2s; }
+        .autocomplete-item:hover { background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); }
+        .search-buttons { margin-top: 15px; text-align: center; }
+        button { padding: 12px 25px; margin: 5px; border: none; border-radius: 25px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-primary { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; }
+        .btn-secondary { background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%); color: white; }
+        .btn-xlsx { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; }
+        .btn-select-all { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; }
+        .filters { padding: 20px 30px; background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
+        .filters label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 400; color: #555; }
+        .filters input[type="checkbox"] { width: 18px; height: 18px; }
+        .results-section { padding: 30px; }
+        .results-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: center; }
+        .results-header h3 { margin: 0; font-size: 1.5em; }
+        .summary { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; padding: 25px; border-radius: 15px; margin-bottom: 30px; text-align: center; box-shadow: 0 5px 15px rgba(17,153,142,0.3); }
+        .summary h3 { margin: 0 0 15px 0; font-size: 1.3em; }
+        .summary p { margin: 5px 0; font-size: 1.1em; }
+        .client-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 25px; margin-bottom: 30px; }
+        .client-card { background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); overflow: hidden; transition: all 0.3s; }
+        .client-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .client-header { padding: 20px; color: white; font-weight: 500; font-size: 1.2em; }
+        .client-titles { padding: 0 20px 20px 20px; }
+        .client-totals { padding: 0 20px 20px 20px; display: flex; flex-direction: column; gap: 10px; }
+        .total-card { padding: 15px; border-radius: 10px; text-align: center; font-weight: 600; }
+        .total-overdue { background: #ffebee; color: #c62828; }
+        .total-future { background: #e8f5e9; color: #2e7d32; }
+        .total-paid { background: #f5f5f5; color: #616161; }
+        .total-general { background: #eceff1; color: #424242; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+        th { background: #f8f9fa; font-weight: 500; color: #555; }
+        .paid-title { background-color: #f8f9fa; color: #6c757d; }
+        .no-results { text-align: center; color: #7f8c8d; padding: 60px 20px; background: #f8f9fa; border-radius: 15px; font-size: 1.1em; }
+        .pdf-btn, .xlsx-btn, .select-all-btn { display: inline-block; margin: 0 10px 30px; width: 220px; font-size: 16px; }
+        .pdf-btn { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; }
+        .xlsx-btn { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; }
+        .select-all-btn { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; }
+        .client-checkboxes { padding: 20px 30px; background: white; border-bottom: 1px solid #eee; display: flex; flex-wrap: wrap; gap: 10px; }
+        .client-checkboxes label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-weight: 400; color: #555; }
+        .client-checkboxes input[type="checkbox"] { width: 16px; height: 16px; }
+        .select-all-container { padding: 15px 30px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; }
+        .select-all-container label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; color: #34495e; }
+        .select-all-container input[type="checkbox"] { width: 18px; height: 18px; }
+        .pdf-preview { display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
+        .pdf-preview canvas { max-width: 100%; height: auto; }
+        @media (max-width: 768px) { 
+            .container { margin: 10px; border-radius: 10px; }
+            .header { padding: 30px 15px; }
+            .header h1 { font-size: 2em; }
+            .filters, .client-checkboxes { flex-direction: column; gap: 15px; align-items: center; }
+            .client-cards { grid-template-columns: 1fr; gap: 15px; }
+            .results-section, .search-container, .import-section { padding: 20px; }
+            .pdf-btn, .xlsx-btn, .select-all-btn { display: block; margin: 0 auto 15px; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Consulta de Títulos por Cliente</h1>
+	    <h1>Quitados ou em aberto (vencidos ou a vencer) </h1>
+            <p>Importe sua planilha e consulte os títulos de seus clientes </p>
+        </div>
+
+        <div class="import-section">
+            <h3>Importe aqui a Planilha com os dados</h3>
+            <div class="file-input">
+                <label for="fileInput">Selecionar Arquivo Excel (xlsx)</label>
+                <input type="file" id="fileInput" accept=".xlsx,.xls">
+            </div>
+            <p>Formato esperado da planilha: Colunas CLIENTE, VENCIMENTO, DESCRIÇÃO, VALOR, LIQUIDAÇÃO, EMPRESA</p>
+            <p>Arquivo: <span id="fileName">Nenhum arquivo selecionado</span></p>
+            <p>Registros carregados: <span id="recordsLoaded">0</span></p>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Digite o nome do cliente para busca automática...">
+            <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
+            <div class="search-buttons">
+                <button class="btn-primary" id="searchButton">Pesquisar</button>
+                <button class="btn-secondary" id="clearButton">Limpar</button>
+                <button class="btn-select-all" id="selectAllButton">Selecionar Todos</button>
+            </div>
+        </div>
+
+        <div class="select-all-container" id="selectAllContainer" style="display: none;">
+            <label><input type="checkbox" id="selectAllCheckbox"> Selecionar/Deselecionar Todos</label>
+        </div>
+
+        <div class="client-checkboxes" id="clientCheckboxes" style="display: none;">
+            <h3>Selecione os Clientes:</h3>
+        </div>
+
+        <div class="filters">
+            <label><input type="checkbox" id="onlyOverdue" checked> Mostrar apenas títulos vencidos ou a vencer hoje</label>
+            <label><input type="checkbox" id="showFuture"> Mostrar títulos que ainda não venceram</label>
+            <label><input type="checkbox" id="showPaid"> Mostrar títulos quitados</label>
+        </div>
+
+        <div class="results-section">
+            <div class="results-header">
+                <h3>Clientes encontrados: <span id="clientsFound">0</span></h3>
+            </div>
+
+            <div class="summary" id="summary" style="display: none;">
+                <h3>Resumo Financeiro</h3>
+                <p>Total Vencidos: <span id="totalOverdue">R$ 0,00</span></p>
+                <p>Total A Vencer: <span id="totalFuture">R$ 0,00</span></p>
+                <p>Total Quitados: <span id="totalPaid">R$ 0,00</span></p>
+                <p>Total Geral: <span id="totalGeneral">R$ 0,00</span></p>
+                <p>Clientes encontrados: <span id="clientsCount">0</span></p>
+            </div>
+
+            <div id="results">
+                <div class="no-results">Nenhum resultado encontrado<br>Tente pesquisar por outro nome ou alterar os filtros.</div>
+            </div>
+        </div>
+
+        <div style="text-align: center; padding: 20px;">
+            <button class="select-all-btn" id="selectAllClientsButton">Selecionar Todos os Clientes</button>
+            <button class="pdf-btn" id="pdfButton">Visualizar PDF</button>
+            <button class="xlsx-btn" id="xlsxButton">Gerar XLSX</button>
+        </div>
+        
+        <div class="pdf-preview" id="pdfPreview"></div>
+    </div>
+
+    <script>
+        // Dados de exemplo para demonstração
+        const sampleData = [
+            ["CLIENTE", "VENCIMENTO", "DESCRIÇÃO", "VALOR", "LIQUIDAÇÃO", "EMPRESA"],
+            ["HOSPITAL SAMCORDIS LTDA", "2025-09-01 00:00:00", "NF 13879", 5450, "2025-09-02 00:00:00", "Empresa A de Distribuição Médica Ltda"],
+            ["CASA DE SAUDE NOSSA SENHORA AUXILIADORA AS", "2025-09-01 00:00:00", "NF 14499", "4.200,00", "2025-09-08 00:00:00", "Empresa B Hospitalar e Serviços"],
+            ["INSTITUICAO ADVENTISTA", "2025-09-01", "NF 14287", "12.753,00", "", "Empresa C"]
+        ];
+
+        let data = [];
+        let clients = {};
+        let allClientNames = [];
+        let selectedClients = new Set();
+        const currentDate = new Date(); // usa data atual
+        const serialOffset = 25569;
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar event listeners
+            document.getElementById('fileInput').addEventListener('change', importFile);
+            document.getElementById('searchInput').addEventListener('keyup', handleSearchInput);
+            document.getElementById('searchButton').addEventListener('click', performSearch);
+            document.getElementById('clearButton').addEventListener('click', clearSearch);
+            document.getElementById('selectAllButton').addEventListener('click', selectAllFromSearch);
+            document.getElementById('selectAllCheckbox').addEventListener('change', toggleAllClients);
+            document.getElementById('selectAllClientsButton').addEventListener('click', selectAllClients);
+            document.getElementById('onlyOverdue').addEventListener('change', updateResults);
+            document.getElementById('showFuture').addEventListener('change', updateResults);
+            document.getElementById('showPaid').addEventListener('change', updateResults);
+            document.getElementById('pdfButton').addEventListener('click', previewPDF);
+            document.getElementById('xlsxButton').addEventListener('click', generateXLSX);
+            
+            // Carregar dados de exemplo
+            data = sampleData;
+            processData();
+        });
+
+        // Converte serial do Excel pra Date ou aceita strings ISO ou dd/mm/yyyy - CORRIGIDO
+        function serialToDate(serial) {
+            if (serial === null || serial === undefined || serial === '') return null;
+            // Se já for Date
+            if (serial instanceof Date) return serial;
+            // Se for número (Excel serial) - CORREÇÃO AQUI
+            if (!isNaN(serial) && serial !== '' && typeof serial !== 'string') {
+                // Correção: Excel usa base 1 de janeiro de 1900, JavaScript usa base 1 de janeiro de 1970
+                // A fórmula correta é: (serial - 25569) * 86400 * 1000
+                const utcDays = Math.floor(serial - serialOffset);
+                const utcValue = utcDays * 86400 * 1000;
+                const date = new Date(utcValue);
+                
+                // Ajustar para fuso horário local
+                const timezoneOffset = date.getTimezoneOffset() * 60000;
+                return new Date(utcValue + timezoneOffset);
+            }
+            // Se for string contendo formato ISO ou com espaço
+            if (typeof serial === 'string') {
+                const s = serial.trim();
+                // Tentar conversão direta
+                const d1 = new Date(s);
+                if (!isNaN(d1)) return d1;
+                // Tentar DD/MM/YYYY (com ou sem hora)
+                const dateOnlyMatch = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+                if (dateOnlyMatch) {
+                    const day = parseInt(dateOnlyMatch[1], 10);
+                    const month = parseInt(dateOnlyMatch[2], 10) - 1;
+                    const year = parseInt(dateOnlyMatch[3], 10);
+                    return new Date(year, month, day);
+                }
+                // Tentar YYYY-MM-DD (formato ISO)
+                const isoMatch = s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
+                if (isoMatch) {
+                    const year = parseInt(isoMatch[1], 10);
+                    const month = parseInt(isoMatch[2], 10) - 1;
+                    const day = parseInt(isoMatch[3], 10);
+                    return new Date(year, month, day);
+                }
+            }
+            return null;
+        }
+
+        function levenshteinDistance(str1, str2) {
+            const matrix = Array(str2.length + 1).fill().map(() => Array(str1.length + 1).fill(0));
+            for (let i = 0; i <= str2.length; i++) matrix[i][0] = i;
+            for (let j = 0; j <= str1.length; j++) matrix[0][j] = j;
+            for (let i = 1; i <= str2.length; i++)
+                for (let j = 1; j <= str1.length; j++)
+                    matrix[i][j] = str2[i-1] === str1[j-1] ? matrix[i-1][j-1] : Math.min(matrix[i-1][j-1] + 1, matrix[i][j-1] + 1, matrix[i-1][j] + 1);
+            return matrix[str2.length][str1.length];
+        }
+
+        function fuzzyMatch(query, str, threshold = 0.6) {
+            if (!str) return 0;
+            if (str.toLowerCase().includes(query.toLowerCase())) return 1;
+            const distance = levenshteinDistance(query.toLowerCase(), str.toLowerCase());
+            const maxLen = Math.max(query.length, str.length);
+            return 1 - (distance / maxLen) >= threshold ? 1 - (distance / maxLen) : 0;
+        }
+
+        function importFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            document.getElementById('fileName').textContent = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const workbook = XLSX.read(e.target.result, { type: 'binary' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                processData();
+            };
+            reader.readAsBinaryString(file);
+        }
+
+        // Função robusta para converter campo VALOR em número
+        function parseCurrencyToNumber(val) {
+            if (val === null || val === undefined || val === '') return 0;
+            // Se já for número
+            if (typeof val === 'number') return val;
+            // Se for string, limpar e converter
+            let s = String(val).trim();
+            // Remover parênteses (indicando negativo) e marcar sinal
+            let negative = false;
+            if (/^\(.*\)$/.test(s)) {
+                negative = true;
+                s = s.replace(/^\(|\)$/g, '');
+            }
+            // Remover "R$", espaços e letras
+            s = s.replace(/[R$\sA-Za-z]/g, '');
+            // Remover pontos de milhar, substituir vírgula decimal por ponto
+            // Caso a string tenha mais de um separador de vírgula/ponto, removemos pontos (milhares)
+            // e mantemos a última vírgula como decimal (convertendo para ponto).
+            // Simples abordagem:
+            // - substituir vírgulas por marcador temporário
+            s = s.replace(/\./g, ''); // remove pontos de milhar
+            s = s.replace(/,/g, '.'); // vírgulas -> ponto decimal
+            // remover qualquer caractere não numérico/.- restante
+            s = s.replace(/[^0-9\.\-]/g, '');
+            const n = parseFloat(s);
+            if (isNaN(n)) return 0;
+            return negative ? -n : n;
+        }
+
+        function processData() {
+            clients = {};
+            allClientNames = [];
+            let loadedCount = 0;
+            if (!Array.isArray(data) || data.length === 0) return;
+
+            for (let i = 0; i < data.length; i++) {
+                const row = data[i];
+                if (!Array.isArray(row) || row.length < 4) continue;
+
+                let cliente = row[0] ? String(row[0]).trim() : '';
+                if (!cliente || cliente.toUpperCase() === 'CLIENTE' || cliente.toUpperCase() === 'CLIENTES ATRASADOS ANTIGOS' || cliente.toUpperCase().startsWith('TOTAL')) continue;
+
+                const venc = row[1];
+                const desc = row[2] ? String(row[2]).trim() : '';
+                const rawValor = row[3];
+                const valor = parseCurrencyToNumber(rawValor);
+                const liq = row[4] || '';
+                const emissora = row[5] ? String(row[5]).trim() : '';
+
+                // se valor zero ou NaN, ignorar registro
+                if (isNaN(valor) || valor === 0) continue;
+
+                if (!clients[cliente]) {
+                    clients[cliente] = { titles: [] };
+                    allClientNames.push(cliente);
+                }
+
+                clients[cliente].titles.push({ venc, desc, valor, liq, emissora });
+                loadedCount++;
+            }
+
+            allClientNames.sort((a,b) => a.localeCompare(b));
+            document.getElementById('recordsLoaded').textContent = loadedCount;
+        }
+
+        function calculateTotalByCategory(titles, onlyOverdue, showFuture, showPaid) {
+            let overdue = 0, future = 0, paid = 0;
+            titles.forEach(title => {
+                const dueDate = serialToDate(title.venc);
+                const liqDate = serialToDate(title.liq);
+                if (!title.liq || !liqDate) {
+                    if (dueDate && dueDate <= currentDate) overdue += Number(title.valor || 0);
+                    else if (dueDate && dueDate > currentDate) future += Number(title.valor || 0);
+                    else overdue += Number(title.valor || 0); // se não tem data, considerar vencido (por segurança)
+                } else if (showPaid) paid += Number(title.valor || 0);
+            });
+            return { overdue, future, paid, general: overdue + future + paid };
+        }
+
+        function calculateGlobalTotals(filteredClients) {
+            let globalTotals = { overdue: 0, future: 0, paid: 0, general: 0 };
+            for (let client in filteredClients) {
+                const totals = filteredClients[client].totals;
+                globalTotals.overdue += totals.overdue;
+                globalTotals.future += totals.future;
+                globalTotals.paid += totals.paid;
+                globalTotals.general += totals.general;
+            }
+            return globalTotals;
+        }
+
+        function isTitleOpen(title) {
+            return !title.liq || !serialToDate(title.liq);
+        }
+
+        function handleSearchInput() {
+            const query = document.getElementById('searchInput').value.trim();
+            const dropdown = document.getElementById('autocompleteDropdown');
+            if (query.length < 2) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            const matches = allClientNames
+                .map(name => ({ name, score: fuzzyMatch(query, name) }))
+                .filter(match => match.score > 0)
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 10);
+
+            let html = '';
+            matches.forEach(match => {
+                html += `<div class="autocomplete-item" onclick="selectClient('${match.name.replace(/'/g, "\\'")}')">${match.name} (similaridade: ${(match.score * 100).toFixed(0)}%)</div>`;
+            });
+
+            dropdown.innerHTML = html;
+            dropdown.style.display = matches.length > 0 ? 'block' : 'none';
+        }
+
+        function selectClient(clientName) {
+            document.getElementById('searchInput').value = clientName;
+            document.getElementById('autocompleteDropdown').style.display = 'none';
+            showClientCheckboxes();
+        }
+
+        function showClientCheckboxes() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            // Mostrar container do checkbox "Selecionar Todos"
+            document.getElementById('selectAllContainer').style.display = 'block';
+            
+            if (!query) {
+                document.getElementById('clientCheckboxes').style.display = 'none';
+                return;
+            }
+
+            const matches = allClientNames
+                .map(name => ({ name, score: fuzzyMatch(query, name) }))
+                .filter(match => match.score > 0)
+                .sort((a, b) => b.score - a.score)
+                .slice(0, 10);
+
+            let html = '<h3>Selecione os Clientes:</h3>';
+            matches.forEach(match => {
+                html += `<label><input type="checkbox" name="client" value="${match.name}"> ${match.name}</label>`;
+            });
+            document.getElementById('clientCheckboxes').innerHTML = html;
+            document.getElementById('clientCheckboxes').style.display = 'block';
+            
+            // Adicionar event listeners aos checkboxes
+            document.querySelectorAll('input[name="client"]').forEach(cb => {
+                cb.addEventListener('change', updateSelectAllCheckbox);
+                cb.addEventListener('change', updateResults);
+            });
+            
+            // Atualizar o estado do checkbox "Selecionar Todos"
+            updateSelectAllCheckbox();
+        }
+
+        function updateSelectAllCheckbox() {
+            const checkboxes = document.querySelectorAll('input[name="client"]');
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            
+            if (checkboxes.length === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+                return;
+            }
+            
+            const checkedCount = document.querySelectorAll('input[name="client"]:checked').length;
+            
+            if (checkedCount === 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            } else if (checkedCount === checkboxes.length) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            }
+        }
+
+        function toggleAllClients() {
+            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+            const checkboxes = document.querySelectorAll('input[name="client"]');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+            
+            updateResults();
+        }
+
+        function getSelectedClients() {
+            selectedClients.clear();
+            document.querySelectorAll('input[name="client"]:checked').forEach(cb => selectedClients.add(cb.value));
+            return selectedClients;
+        }
+
+        function updateResults() {
+            const onlyOverdue = document.getElementById('onlyOverdue').checked;
+            const showFuture = document.getElementById('showFuture').checked;
+            const showPaid = document.getElementById('showPaid').checked;
+            const selected = getSelectedClients();
+
+            let filteredClients = {};
+            let clientCount = 0;
+
+            for (let client of selected) {
+                if (clients[client]) {
+                    let clientTitles = clients[client].titles.slice();
+
+                    clientTitles = clientTitles.filter(title => {
+                        const dueDate = serialToDate(title.venc);
+                        if (!dueDate) return false;
+                        const isOverdueOrToday = dueDate <= currentDate;
+                        const isFuture = dueDate > currentDate;
+
+                        if (onlyOverdue && !showFuture) return isOverdueOrToday;
+                        else if (showFuture && !onlyOverdue) return isFuture;
+                        else return true;
+                    });
+
+                    let openTitles = clientTitles.filter(isTitleOpen);
+                    let paidTitles = showPaid ? clientTitles.filter(title => !isTitleOpen(title)) : [];
+
+                    let displayTitles = openTitles.concat(paidTitles);
+
+                    if (displayTitles.length > 0) {
+                        const totals = calculateTotalByCategory(displayTitles, onlyOverdue, showFuture, showPaid);
+                        filteredClients[client] = { titles: displayTitles, totals };
+                        clientCount++;
+                    }
+                }
+            }
+
+            const globalTotals = calculateGlobalTotals(filteredClients);
+            document.getElementById('clientsFound').textContent = clientCount;
+            document.getElementById('clientsCount').textContent = clientCount;
+            document.getElementById('totalOverdue').textContent = globalTotals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('totalFuture').textContent = globalTotals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('totalPaid').textContent = globalTotals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('totalGeneral').textContent = globalTotals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            document.getElementById('summary').style.display = clientCount > 0 ? 'block' : 'none';
+
+            displayResults(filteredClients);
+        }
+
+        function displayResults(filteredClients) {
+            const resultsDiv = document.getElementById('results');
+            if (Object.keys(filteredClients).length === 0) {
+                resultsDiv.innerHTML = '<div class="no-results">Nenhum resultado encontrado<br>Tente selecionar outros clientes ou alterar os filtros.</div>';
+                return;
+            }
+
+            let html = '<div class="client-cards">';
+            let colorIndex = 0;
+            const gradients = [
+                'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)',
+                'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)',
+                'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+            ];
+
+            for (let client in filteredClients) {
+                const gradient = gradients[colorIndex % gradients.length];
+                html += `<div class="client-card">`;
+                html += `<div class="client-header" style="background: ${gradient};">${client}</div>`;
+                html += `<div class="client-titles">`;
+                html += `<table>
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Empresa</th>
+                            <th>Vencimento</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+                filteredClients[client].titles
+                    .sort((a, b) => {
+                        const da = serialToDate(a.venc) || new Date(0);
+                        const db = serialToDate(b.venc) || new Date(0);
+                        return da - db;
+                    })
+                    .forEach(title => {
+                        const dueStr = serialToDate(title.venc) ? serialToDate(title.venc).toLocaleDateString('pt-BR') : 'N/A';
+                        const valorStr = Number(title.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        const isOpen = isTitleOpen(title);
+                        const status = isOpen ? 'Aberto' : 'Quitado';
+                        const className = isOpen ? '' : 'paid-title';
+                        html += `<tr class="${className}">
+                            <td style="font-size: 0.9em;">${title.desc}</td>
+                            <td style="font-size: 0.85em; color:#34495e;">${title.emissora}</td>
+                            <td>${dueStr}</td>
+                            <td style="font-weight: 500; color: ${isOpen ? '#27ae60' : '#6c757d'};">${valorStr}</td>
+                            <td>${status}</td>
+                        </tr>`;
+                    });
+
+                html += `</tbody></table>
+                </div>`;
+                html += `<div class="client-totals">`;
+                const totals = filteredClients[client].totals;
+                html += `<div class="total-card total-overdue">Vencidos: ${totals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>`;
+                html += `<div class="total-card total-future">A Vencer: ${totals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>`;
+                if (document.getElementById('showPaid').checked) {
+                    html += `<div class='total-card total-paid'>Quitados: ${totals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>`;
+                }
+                html += `<div class='total-card total-general'>Total Geral: ${totals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>`;
+                html += `</div>`;
+                html += `</div>`;
+                colorIndex++;
+            }
+
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('autocompleteDropdown').style.display = 'none';
+            document.getElementById('selectAllContainer').style.display = 'none';
+            document.getElementById('clientCheckboxes').style.display = 'none';
+            document.getElementById('clientCheckboxes').innerHTML = '<h3>Selecione os Clientes:</h3>';
+            selectedClients.clear();
+            document.getElementById('onlyOverdue').checked = true;
+            document.getElementById('showFuture').checked = false;
+            document.getElementById('showPaid').checked = false;
+            document.getElementById('clientsFound').textContent = '0';
+            document.getElementById('clientsCount').textContent = '0';
+            document.getElementById('totalOverdue').textContent = 'R$ 0,00';
+            document.getElementById('totalFuture').textContent = 'R$ 0,00';
+            document.getElementById('totalPaid').textContent = 'R$ 0,00';
+            document.getElementById('totalGeneral').textContent = 'R$ 0,00';
+            document.getElementById('summary').style.display = 'none';
+            document.getElementById('results').innerHTML = '<div class="no-results">Nenhum resultado encontrado<br>Tente pesquisar por outro nome ou alterar os filtros.</div>';
+            document.getElementById('pdfPreview').style.display = 'none';
+            document.getElementById('pdfPreview').innerHTML = '';
+        }
+
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                showClientCheckboxes();
+                updateResults();
+            }
+        }
+
+        function selectAllFromSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            
+            if (query) {
+                // Selecionar apenas os clientes correspondentes à busca
+                const matches = allClientNames
+                    .map(name => ({ name, score: fuzzyMatch(query, name) }))
+                    .filter(match => match.score > 0)
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 10);
+                
+                if (matches.length > 0) {
+                    showClientCheckboxes();
+                    document.querySelectorAll('input[name="client"]').forEach(cb => {
+                        cb.checked = true;
+                    });
+                    document.getElementById('selectAllCheckbox').checked = true;
+                    document.getElementById('selectAllCheckbox').indeterminate = false;
+                    updateResults();
+                }
+            } else {
+                // Se não houver busca, selecionar todos os clientes
+                selectAllClients();
+            }
+        }
+
+        function selectAllClients() {
+            // Limpar a busca
+            document.getElementById('searchInput').value = '';
+            document.getElementById('autocompleteDropdown').style.display = 'none';
+            
+            // Mostrar container do checkbox "Selecionar Todos"
+            document.getElementById('selectAllContainer').style.display = 'block';
+            
+            // Criar checkboxes para todos os clientes
+            let html = '<h3>Selecione os Clientes:</h3>';
+            allClientNames.forEach(name => {
+                html += `<label><input type="checkbox" name="client" value="${name}" checked> ${name}</label>`;
+            });
+            document.getElementById('clientCheckboxes').innerHTML = html;
+            document.getElementById('clientCheckboxes').style.display = 'block';
+            
+            // Marcar o checkbox "Selecionar Todos"
+            document.getElementById('selectAllCheckbox').checked = true;
+            document.getElementById('selectAllCheckbox').indeterminate = false;
+            
+            // Adicionar event listeners aos checkboxes
+            document.querySelectorAll('input[name="client"]').forEach(cb => {
+                cb.addEventListener('change', updateSelectAllCheckbox);
+                cb.addEventListener('change', updateResults);
+            });
+            
+            // Atualizar resultados
+            updateResults();
+        }
+
+        function previewPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+            const query = document.getElementById('searchInput').value.trim();
+            let yPos = 20;
+            let globalTotals = { overdue: 0, future: 0, paid: 0, general: 0 };
+            const onlyOverdue = document.getElementById('onlyOverdue').checked;
+            const showFuture = document.getElementById('showFuture').checked;
+            const showPaid = document.getElementById('showPaid').checked;
+            const selected = getSelectedClients();
+
+            // Configurações iniciais
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(22);
+            doc.setTextColor(255, 255, 255);
+            doc.setFillColor(102, 126, 234);
+            doc.rect(0, 0, 210, 25, 'F');
+            doc.text('Relatório de Títulos em Aberto', 105, 18, { align: 'center' });
+            yPos = 35;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Data da Consulta: ${currentDate.toLocaleDateString('pt-BR')}`, 20, yPos);
+            yPos += 7;
+            if (query) {
+                doc.text(`Busca: ${query}`, 20, yPos);
+                yPos += 7;
+            }
+            yPos += 5;
+
+            let clientIndex = 0;
+            const colors = [[255, 236, 210], [252, 182, 159], [168, 237, 234], [254, 214, 227], [210, 153, 194]];
+
+            // Adicionar página de resumo inicial
+            if (yPos > 200) {
+                doc.addPage();
+                yPos = 20;
+            }
+            
+            // Título do resumo
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.setTextColor(52, 73, 94);
+            doc.text('RESUMO GERAL', 105, yPos, { align: 'center' });
+            yPos += 15;
+
+            // Calcular totais globais primeiro
+            for (let client of selected) {
+                if (!clients[client]) continue;
+
+                let clientTitles = clients[client].titles.filter(title => {
+                    const dueDate = serialToDate(title.venc);
+                    if (!dueDate) return false;
+                    const isOverdueOrToday = dueDate <= currentDate;
+                    const isFuture = dueDate > currentDate;
+
+                    if (onlyOverdue && !showFuture) return isOverdueOrToday;
+                    else if (showFuture && !onlyOverdue) return isFuture;
+                    else return true;
+                });
+
+                let openTitles = clientTitles.filter(isTitleOpen);
+                let paidTitles = showPaid ? clientTitles.filter(title => !isTitleOpen(title)) : [];
+                let displayTitles = openTitles.concat(paidTitles);
+
+                if (displayTitles.length === 0) continue;
+
+                const totals = calculateTotalByCategory(displayTitles, onlyOverdue, showFuture, showPaid);
+
+                globalTotals.overdue += totals.overdue;
+                globalTotals.future += totals.future;
+                globalTotals.paid += totals.paid;
+                globalTotals.general += totals.general;
+            }
+
+            // Exibir resumo geral
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            
+            if (globalTotals.overdue > 0) {
+                doc.setTextColor(198, 40, 40);
+                doc.text(`Total Vencidos: ${globalTotals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
+                yPos += 8;
+            }
+            
+            if (globalTotals.future > 0) {
+                doc.setTextColor(39, 174, 96);
+                doc.text(`Total A Vencer: ${globalTotals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
+                yPos += 8;
+            }
+            
+            if (globalTotals.paid > 0 && showPaid) {
+                doc.setTextColor(108, 117, 125);
+                doc.text(`Total Quitados: ${globalTotals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
+                yPos += 8;
+            }
+            
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Total Geral: ${globalTotals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
+            yPos += 15;
+            
+            doc.setTextColor(52, 73, 94);
+            doc.text(`Clientes no Relatório: ${selected.size}`, 20, yPos);
+            yPos += 20;
+
+            // Adicionar detalhamento por cliente
+            for (let client of selected) {
+                if (!clients[client]) continue;
+
+                let clientTitles = clients[client].titles.filter(title => {
+                    const dueDate = serialToDate(title.venc);
+                    if (!dueDate) return false;
+                    const isOverdueOrToday = dueDate <= currentDate;
+                    const isFuture = dueDate > currentDate;
+
+                    if (onlyOverdue && !showFuture) return isOverdueOrToday;
+                    else if (showFuture && !onlyOverdue) return isFuture;
+                    else return true;
+                });
+
+                let openTitles = clientTitles.filter(isTitleOpen);
+                let paidTitles = showPaid ? clientTitles.filter(title => !isTitleOpen(title)) : [];
+                let displayTitles = openTitles.concat(paidTitles);
+
+                if (displayTitles.length === 0) continue;
+
+                const totals = calculateTotalByCategory(displayTitles, onlyOverdue, showFuture, showPaid);
+
+                if (yPos > 250) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+
+                const color = colors[clientIndex % colors.length];
+                const maxClientNameLength = 30;
+                const clientName = client.length > maxClientNameLength ? client.substring(0, maxClientNameLength) + '...' : client;
+                
+                // Cabeçalho do cliente
+                doc.setFillColor(color[0], color[1], color[2]);
+                doc.roundedRect(15, yPos, 180, 10, 3, 3, 'F');
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(14);
+                doc.setTextColor(52, 73, 94);
+                doc.text(clientName, 20, yPos + 7);
+                yPos += 15;
+
+                // Títulos em tabela
+                if (displayTitles.length > 0) {
+                    // Cabeçalho da tabela
+                    doc.setFillColor(240, 240, 240);
+                    doc.rect(20, yPos, 170, 8, 'F');
+                    doc.setFontSize(10);
+                    doc.setTextColor(85, 85, 85);
+                    
+                    // Cabeçalhos das colunas (adicionado Empresa)
+                    // Colunas dentro da largura 170 (começando em x=20)
+                    // layout: Descrição (55mm), Empresa (45mm), Vencimento (30mm), Valor (25mm), Status (15mm)
+                    const col = { x: 22, descW: 55, empresaX: 22 + 55 + 0.5, empresaW: 45, vencX: 22 + 55 + 45 + 3.5, valorX: 22 + 55 + 45 + 30 + 6, statusX: 22 + 55 + 45 + 30 + 25 + 9 };
+                    doc.text('Descrição', col.x, yPos + 5);
+                    doc.text('Empresa', col.empresaX, yPos + 5);
+                    doc.text('Vencimento', col.vencX, yPos + 5);
+                    doc.text('Valor', col.valorX, yPos + 5);
+                    doc.text('Status', col.statusX, yPos + 5);
+                    
+                    yPos += 10;
+                    
+                    // Linhas da tabela (com quebra automática para descrição e empresa)
+                    displayTitles.sort((a, b) => {
+                        const da = serialToDate(a.venc) || new Date(0);
+                        const db = serialToDate(b.venc) || new Date(0);
+                        return da - db;
+                    }).forEach((title, index) => {
+                        // Se não couber, criar nova página e redesenhar cabeçalho da tabela
+                        if (yPos > 270) {
+                            doc.addPage();
+                            yPos = 20;
+                            // Redesenhar cabeçalho da tabela em nova página
+                            doc.setFillColor(240, 240, 240);
+                            doc.rect(20, yPos, 170, 8, 'F');
+                            doc.setFontSize(10);
+                            doc.setTextColor(85, 85, 85);
+                            doc.text('Descrição', col.x, yPos + 5);
+                            doc.text('Empresa', col.empresaX, yPos + 5);
+                            doc.text('Vencimento', col.vencX, yPos + 5);
+                            doc.text('Valor', col.valorX, yPos + 5);
+                            doc.text('Status', col.statusX, yPos + 5);
+                            yPos += 10;
+                        }
+                        
+                        const dueDate = serialToDate(title.venc);
+                        const dueStr = dueDate ? dueDate.toLocaleDateString('pt-BR') : 'N/A';
+                        const valorStr = Number(title.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        const status = isTitleOpen(title) ? 'Aberto' : 'Quitado';
+                        
+                        // Quebra automática (wrap) para descrição and emissora
+                        const descLines = doc.splitTextToSize(title.desc || '', col.descW);
+                        const empLines = doc.splitTextToSize(title.emissora || '', col.empresaW);
+                        const maxLines = Math.max(descLines.length, empLines.length, 1);
+                        const lineHeight = 6; // mm por linha
+                        const rowHeight = maxLines * lineHeight;
+                        
+                        // Alternar cores das linhas para melhor legibilidade (mantendo alternância independente do número de linhas)
+                        if (index % 2 === 0) {
+                            doc.setFillColor(248, 249, 250);
+                            doc.rect(20, yPos - 4, 170, rowHeight + 4, 'F');
+                        }
+                        
+                        // Definir cor com base no status (apenas para o texto)
+                        if (!isTitleOpen(title)) {
+                            doc.setTextColor(108, 117, 125); // Cinza para quitados
+                        } else if (dueDate && dueDate <= currentDate) {
+                            doc.setTextColor(198, 40, 40); // Vermelho para vencidos
+                        } else {
+                            doc.setTextColor(39, 174, 96); // Verde para a vencer
+                        }
+                        
+                        // Escrever múltiplas linhas: doc.text aceita array para multiline
+                        doc.setFontSize(9);
+                        doc.text(descLines, col.x, yPos);
+                        doc.text(empLines, col.empresaX, yPos);
+                        doc.text(dueStr, col.vencX, yPos);
+                        doc.text(valorStr, col.valorX, yPos);
+                        doc.text(status, col.statusX, yPos);
+                        
+                        yPos += rowHeight + 4;
+                    });
+                    
+                    yPos += 5;
+                }
+
+                // Resumo do cliente (igual ao original, mas posiciona após a lista)
+                if (yPos > 240) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(11);
+                doc.setTextColor(255, 255, 255);
+                
+                // Vencidos
+                if (totals.overdue > 0) {
+                    doc.setFillColor(231, 76, 60);
+                    doc.roundedRect(15, yPos, 87, 8, 2, 2, 'F');
+                    doc.text(`Vencidos: ${totals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos + 5);
+                }
+                
+                // A vencer
+                if (totals.future > 0) {
+                    doc.setFillColor(39, 174, 96);
+                    doc.roundedRect(15, yPos + 10, 87, 8, 2, 2, 'F');
+                    doc.text(`A Vencer: ${totals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos + 15);
+                }
+                
+                // Quitados
+                if (totals.paid > 0 && showPaid) {
+                    doc.setFillColor(108, 117, 125);
+                    doc.roundedRect(108, yPos, 87, 8, 2, 2, 'F');
+                    doc.text(`Quitados: ${totals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 113, yPos + 5);
+                }
+                
+                // Total geral
+                doc.setFillColor(52, 152, 219);
+                doc.roundedRect(108, yPos + 10, 87, 8, 2, 2, 'F');
+                doc.text(`Total: ${totals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 113, yPos + 15);
+                
+                yPos += 25;
+                clientIndex++;
+            }
+
+            // Adicionar rodapé com totais finais
+            if (yPos > 220) {
+                doc.addPage();
+                yPos = 20;
+            }
+            
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.setTextColor(52, 73, 94);
+            doc.text('TOTAIS FINAIS', 105, yPos, { align: 'center' });
+            yPos += 15;
+            
+            doc.setFontSize(12);
+            if (globalTotals.overdue > 0) {
+                doc.setTextColor(198, 40, 40);
+                doc.text(`Total Vencidos: ${globalTotals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
+                yPos += 8;
+            }
+            
+            if (globalTotals.future > 0) {
+                doc.setTextColor(39, 174, 96);
+                doc.text(`Total A Vencer: ${globalTotals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
+                yPos += 8;
+            }
+            
+            if (globalTotals.paid > 0 && showPaid) {
+                doc.setTextColor(108, 117, 125);
+                doc.text(`Total Quitados: ${globalTotals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
+                yPos += 8;
+            }
+            
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(14);
+            doc.text(`TOTAL GERAL: ${globalTotals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 105, yPos + 10, { align: 'center' });
+
+            const pdfDataUri = doc.output('datauristring');
+            const pdfPreview = document.getElementById('pdfPreview');
+            pdfPreview.style.display = 'block';
+            pdfPreview.innerHTML = `<iframe src="${pdfDataUri}" width="100%" height="600px" style="border: none;"></iframe>
+                                <button class="btn-primary" style="margin-top: 10px;" onclick="downloadPDF('${pdfDataUri}')">Baixar PDF</button>`;
+        }
+
+        function downloadPDF(pdfDataUri) {
+            const link = document.createElement('a');
+            link.href = pdfDataUri;
+            link.download = `relatorio_titulos_aberto_${currentDate.toISOString().split('T')[0]}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            document.getElementById('pdfPreview').style.display = 'none';
+            document.getElementById('pdfPreview').innerHTML = '';
+        }
+
+        function generateXLSX() {
+            const wb = XLSX.utils.book_new();
+            const selected = getSelectedClients();
+            const onlyOverdue = document.getElementById('onlyOverdue').checked;
+            const showFuture = document.getElementById('showFuture').checked;
+            const showPaid = document.getElementById('showPaid').checked;
+            let allData = [];
+
+            allData.push(['Cliente', 'Descrição', 'Empresa', 'Vencimento', 'Valor', 'Status']);
+
+            for (let client of selected) {
+                if (!clients[client]) continue;
+
+                let clientTitles = clients[client].titles.filter(title => {
+                    const dueDate = serialToDate(title.venc);
+                    if (!dueDate) return false;
+                    const isOverdueOrToday = dueDate <= currentDate;
+                    const isFuture = dueDate > currentDate;
+
+                    if (onlyOverdue && !showFuture) return isOverdueOrToday;
+                    else if (showFuture && !onlyOverdue) return isFuture;
+                    else return true;
+                });
+
+                let openTitles = clientTitles.filter(isTitleOpen);
+                let paidTitles = showPaid ? clientTitles.filter(title => !isTitleOpen(title)) : [];
+                let displayTitles = openTitles.concat(paidTitles);
+
+                displayTitles.forEach(title => {
+                    const dueStr = serialToDate(title.venc) ? serialToDate(title.venc).toLocaleDateString('pt-BR') : 'N/A';
+                    const valorNum = Number(title.valor || 0);
+                    const status = isTitleOpen(title) ? 'Aberto' : 'Quitado';
+                    allData.push([client, title.desc, title.emissora, dueStr, valorNum, status]);
+                });
+            }
+
+            const ws = XLSX.utils.aoa_to_sheet(allData);
+
+            // Ajuste de colunas para melhorar leitura (larguras em caracteres aproximados)
+            ws['!cols'] = [
+                { wch: 30 }, // Cliente
+                { wch: 50 }, // Descrição
+                { wch: 40 }, // Empresa
+                { wch: 15 }, // Vencimento
+                { wch: 15 }, // Valor
+                { wch: 12 }  // Status
+            ];
+
+            // Tentar aplicar wrapText nas colunas Descrição e Empresa
+            try {
+                for (let r = 1; r < allData.length; r++) {
+                    const descCellAddr = `B${r + 1}`;
+                    const empCellAddr = `C${r + 1}`;
+                    if (ws[descCellAddr]) {
+                        ws[descCellAddr].s = ws[descCellAddr].s || {};
+                        ws[descCellAddr].s.alignment = ws[descCellAddr].s.alignment || {};
+                        ws[descCellAddr].s.alignment.wrapText = true;
+                    }
+                    if (ws[empCellAddr]) {
+                        ws[empCellAddr].s = ws[empCellAddr].s || {};
+                        ws[empCellAddr].s.alignment = ws[empCellAddr].s.alignment || {};
+                        ws[empCellAddr].s.alignment.wrapText = true;
+                    }
+                }
+            } catch (e) {
+                console.warn('Não foi possível aplicar estilos de célula no XLSX (wrap).', e);
+            }
+
+            // Formatar coluna Valor como número (para permitir que o Excel entenda)
+            try {
+                for (let r = 1; r < allData.length; r++) {
+                    const valAddr = `E${r + 1}`;
+                    if (ws[valAddr]) {
+                        const num = typeof ws[valAddr].v === 'number' ? ws[valAddr].v : parseFloat(String(ws[valAddr].v).toString().replace(/[^\d.-]/g, '').replace(',', '.'));
+                        ws[valAddr].v = isNaN(num) ? ws[valAddr].v : num;
+                        ws[valAddr].t = 'n';
+                        ws[valAddr].z = '"R$"#,##0.00';
+                    }
+                }
+            } catch (e) {
+                console.warn('Não foi possível aplicar formatação numérica no XLSX.', e);
+            }
+
+            XLSX.utils.book_append_sheet(wb, ws, 'Títulos em Aberto');
+            XLSX.writeFile(wb, `relatorio_titulos_aberto_${currentDate.toISOString().split('T')[0]}.xlsx`);
+        }
+
+        document.addEventListener('click', function(e) {
+            const dropdown = document.getElementById('autocompleteDropdown');
+            const input = document.getElementById('searchInput');
+            if (!input.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        // Inicializar com dados de exemplo (pode ser substituído pelo importFile)
+        processData();
+    </script>
+</body>
+</html>
