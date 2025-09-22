@@ -69,6 +69,13 @@
         .filters { padding: 20px 30px; background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
         .filters label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 400; color: #555; }
         .filters input[type="checkbox"] { width: 18px; height: 18px; }
+        .date-filters { padding: 20px 30px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .date-inputs-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; width: 100%; }
+        .date-input-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .date-input-group label { font-weight: 500; color: #555; margin-bottom: 5px; }
+        .date-filters input[type="date"] { padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; width: 150px; }
+        .date-buttons { display: flex; gap: 10px; justify-content: center; }
+        .date-buttons button { margin: 0; }
         .results-section { padding: 30px; }
         .results-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: center; }
         .results-header h3 { margin: 0; font-size: 1.5em; }
@@ -98,16 +105,19 @@
         .client-checkboxes { padding: 20px 30px; background: white; border-bottom: 1px solid #eee; display: flex; flex-wrap: wrap; gap: 10px; z-index: 1; position: relative; }
         .client-checkboxes label { display: flex; align-items: center; gap: 5px; cursor: pointer; font-weight: 400; color: #555; }
         .client-checkboxes input[type="checkbox"] { width: 16px; height: 16px; }
+        .client-checkboxes h3 { width: 100%; margin-bottom: 10px; color: #333; font-weight: 600; }
         .select-all-container { padding: 15px 30px; background: #f8f9fa; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px; z-index: 1; position: relative; }
         .select-all-container label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; color: #34495e; }
         .select-all-container input[type="checkbox"] { width: 18px; height: 18px; }
         .pdf-preview { display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
         .pdf-preview canvas { max-width: 100%; height: auto; }
+        .client-name { font-weight: 700; color: #000 !important; }
         @media (max-width: 768px) { 
             .container { margin: 10px; border-radius: 10px; }
             .header { padding: 30px 15px; }
             .header h1 { font-size: 2em; }
-            .filters, .client-checkboxes { flex-direction: column; gap: 15px; align-items: center; }
+            .filters, .client-checkboxes, .date-filters { flex-direction: column; gap: 15px; align-items: center; }
+            .date-inputs-container { flex-direction: column; }
             .client-cards { grid-template-columns: 1fr; gap: 15px; }
             .results-section, .search-container, .import-section { padding: 20px; }
             .pdf-btn, .xlsx-btn, .select-all-btn { display: block; margin: 0 auto 15px; width: 100%; }
@@ -150,6 +160,23 @@
 
         <div class="client-checkboxes" id="clientCheckboxes" style="display: none;">
             <h3>Selecione os Clientes:</h3>
+        </div>
+
+        <div class="date-filters" id="dateFilters" style="display: none;">
+            <div class="date-inputs-container">
+                <div class="date-input-group">
+                    <label for="startDate">Data Inicial:</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="date-input-group">
+                    <label for="endDate">Data Final:</label>
+                    <input type="date" id="endDate">
+                </div>
+            </div>
+            <div class="date-buttons">
+                <button class="btn-primary" id="applyDateFilter">Aplicar Filtro de Data</button>
+                <button class="btn-secondary" id="clearDateFilter">Limpar Filtro de Data</button>
+            </div>
         </div>
 
         <div class="filters">
@@ -203,6 +230,9 @@
         let selectedClients = new Set();
         const currentDate = new Date(); // usa data atual
         const serialOffset = 25569;
+        let dateFilterActive = false;
+        let startDateFilter = null;
+        let endDateFilter = null;
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
@@ -219,6 +249,8 @@
             document.getElementById('showPaid').addEventListener('change', updateResults);
             document.getElementById('pdfButton').addEventListener('click', previewPDF);
             document.getElementById('xlsxButton').addEventListener('click', generateXLSX);
+            document.getElementById('applyDateFilter').addEventListener('click', applyDateFilter);
+            document.getElementById('clearDateFilter').addEventListener('click', clearDateFilter);
             
             // Carregar dados de exemplo
             data = sampleData;
@@ -463,6 +495,7 @@
             
             if (!query) {
                 document.getElementById('clientCheckboxes').style.display = 'none';
+                document.getElementById('dateFilters').style.display = 'none';
                 return;
             }
 
@@ -474,15 +507,24 @@
 
             let html = '<h3>Selecione os Clientes:</h3>';
             matches.forEach(match => {
-                html += `<label><input type="checkbox" name="client" value="${match.name}"> ${match.name}</label>`;
+                const isChecked = selectedClients.has(match.name) ? 'checked' : '';
+                html += `<label><input type="checkbox" name="client" value="${match.name}" ${isChecked}> ${match.name}</label>`;
             });
             document.getElementById('clientCheckboxes').innerHTML = html;
             document.getElementById('clientCheckboxes').style.display = 'block';
+            document.getElementById('dateFilters').style.display = 'block';
             
             // Adicionar event listeners aos checkboxes
             document.querySelectorAll('input[name="client"]').forEach(cb => {
-                cb.addEventListener('change', updateSelectAllCheckbox);
-                cb.addEventListener('change', updateResults);
+                cb.addEventListener('change', function() {
+                    if (this.checked) {
+                        selectedClients.add(this.value);
+                    } else {
+                        selectedClients.delete(this.value);
+                    }
+                    updateSelectAllCheckbox();
+                    updateResults();
+                });
             });
             
             // Atualizar o estado do checkbox "Selecionar Todos"
@@ -519,15 +561,86 @@
             
             checkboxes.forEach(checkbox => {
                 checkbox.checked = selectAllCheckbox.checked;
+                if (selectAllCheckbox.checked) {
+                    selectedClients.add(checkbox.value);
+                } else {
+                    selectedClients.delete(checkbox.value);
+                }
             });
             
             updateResults();
         }
 
         function getSelectedClients() {
-            selectedClients.clear();
-            document.querySelectorAll('input[name="client"]:checked').forEach(cb => selectedClients.add(cb.value));
             return selectedClients;
+        }
+
+        function applyDateFilter() {
+            const startDateInput = document.getElementById('startDate').value;
+            const endDateInput = document.getElementById('endDate').value;
+            
+            if (!startDateInput && !endDateInput) {
+                dateFilterActive = false;
+                startDateFilter = null;
+                endDateFilter = null;
+                updateResults();
+                return;
+            }
+            
+            // CORREÇÃO: Usar a data exata selecionada, sem ajustes de fuso horário
+            if (startDateInput) {
+                startDateFilter = new Date(startDateInput);
+                // Manter a data exata sem ajustes de hora
+                startDateFilter.setHours(0, 0, 0, 0);
+            } else {
+                startDateFilter = null;
+            }
+            
+            if (endDateInput) {
+                endDateFilter = new Date(endDateInput);
+                // Incluir todo o dia final (até 23:59:59.999)
+                endDateFilter.setHours(23, 59, 59, 999);
+            } else {
+                endDateFilter = null;
+            }
+            
+            dateFilterActive = true;
+            updateResults();
+        }
+
+        function clearDateFilter() {
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            dateFilterActive = false;
+            startDateFilter = null;
+            endDateFilter = null;
+            updateResults();
+        }
+
+        function isDateInRange(date, start, end) {
+            if (!date) return false;
+            
+            // CORREÇÃO: Comparar datas sem ajustes de fuso horário
+            const dateOnly = new Date(date);
+            dateOnly.setHours(12, 0, 0, 0); // Definir meio-dia para evitar problemas de fuso horário
+            
+            if (start && end) {
+                const startCopy = new Date(start);
+                const endCopy = new Date(end);
+                startCopy.setHours(12, 0, 0, 0);
+                endCopy.setHours(12, 0, 0, 0);
+                return dateOnly >= startCopy && dateOnly <= endCopy;
+            } else if (start) {
+                const startCopy = new Date(start);
+                startCopy.setHours(12, 0, 0, 0);
+                return dateOnly >= startCopy;
+            } else if (end) {
+                const endCopy = new Date(end);
+                endCopy.setHours(12, 0, 0, 0);
+                return dateOnly <= endCopy;
+            }
+            
+            return true;
         }
 
         function updateResults() {
@@ -535,79 +648,94 @@
             const showFuture = document.getElementById('showFuture').checked;
             const showPaid = document.getElementById('showPaid').checked;
             const selected = getSelectedClients();
-
-            // Se nenhum filtro estiver selecionado, zerar tudo
-            if (!onlyOverdue && !showFuture && !showPaid) {
-                document.getElementById('clientsFound').textContent = '0';
-                document.getElementById('clientsCount').textContent = '0';
-                document.getElementById('totalOverdue').textContent = 'R$ 0,00';
-                document.getElementById('totalFuture').textContent = 'R$ 0,00';
-                document.getElementById('totalPaid').textContent = 'R$ 0,00';
-                document.getElementById('totalGeneral').textContent = 'R$ 0,00';
-                document.getElementById('summary').style.display = 'none';
-                document.getElementById('results').innerHTML = '<div class="no-results">Nenhum filtro selecionado<br>Selecione pelo menos um filtro para visualizar os resultados.</div>';
-                return;
-            }
-
+            
             let filteredClients = {};
-            let clientCount = 0;
-
-            for (let client of selected) {
-                if (clients[client]) {
-                    let clientTitles = clients[client].titles.slice();
-
-                    // Filtrar títulos com base nos filtros selecionados
-                    clientTitles = clientTitles.filter(title => {
-                        const dueDate = serialToDate(title.venc);
-                        const liqDate = serialToDate(title.liq);
-                        const isPaid = title.liq && liqDate;
-                        
-                        // Se o título está quitado
-                        if (isPaid) {
-                            return showPaid;
-                        } 
-                        // Se o título está em aberto
-                        else {
-                            if (dueDate) {
-                                if (dueDate <= currentDate) {
-                                    return onlyOverdue;
-                                } else {
-                                    return showFuture;
-                                }
-                            } else {
-                                // Se não tem data de vencimento, considerar como vencido
-                                return onlyOverdue;
-                            }
-                        }
-                    });
-
-                    if (clientTitles.length > 0) {
-                        const totals = calculateTotalByCategory(clientTitles);
-                        filteredClients[client] = { titles: clientTitles, totals };
-                        clientCount++;
+            
+            // Se não há clientes selecionados, mostrar todos
+            if (selected.size === 0) {
+                for (let client in clients) {
+                    filteredClients[client] = { ...clients[client] };
+                }
+            } else {
+                // Filtrar pelos clientes selecionados
+                for (let client of selected) {
+                    if (clients[client]) {
+                        filteredClients[client] = { ...clients[client] };
                     }
                 }
             }
-
-            const globalTotals = calculateGlobalTotals(filteredClients);
-            document.getElementById('clientsFound').textContent = clientCount;
-            document.getElementById('clientsCount').textContent = clientCount;
-            document.getElementById('totalOverdue').textContent = globalTotals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('totalFuture').textContent = globalTotals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('totalPaid').textContent = globalTotals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('totalGeneral').textContent = globalTotals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('summary').style.display = clientCount > 0 ? 'block' : 'none';
-
+            
+            // Aplicar filtros de data e status aos títulos de cada cliente
+            for (let client in filteredClients) {
+                const clientTitles = filteredClients[client].titles;
+                const filteredTitles = clientTitles.filter(title => {
+                    const dueDate = serialToDate(title.venc);
+                    const liqDate = serialToDate(title.liq);
+                    const isPaid = title.liq && liqDate;
+                    
+                    // Filtro por data
+                    if (dateFilterActive) {
+                        const titleDate = isPaid ? liqDate : dueDate;
+                        if (!isDateInRange(titleDate, startDateFilter, endDateFilter)) {
+                            return false;
+                        }
+                    }
+                    
+                    // Filtro por status
+                    if (isPaid) {
+                        return showPaid;
+                    } else {
+                        if (dueDate) {
+                            if (dueDate <= currentDate) {
+                                return onlyOverdue;
+                            } else {
+                                return showFuture;
+                            }
+                        } else {
+                            // Se não tem data de vencimento, considerar como vencido
+                            return onlyOverdue;
+                        }
+                    }
+                });
+                
+                filteredClients[client].titles = filteredTitles;
+                filteredClients[client].totals = calculateTotalByCategory(filteredTitles);
+            }
+            
+            // Remover clientes sem títulos após filtragem
+            for (let client in filteredClients) {
+                if (filteredClients[client].titles.length === 0) {
+                    delete filteredClients[client];
+                }
+            }
+            
             displayResults(filteredClients);
         }
 
         function displayResults(filteredClients) {
             const resultsDiv = document.getElementById('results');
-            if (Object.keys(filteredClients).length === 0) {
-                resultsDiv.innerHTML = '<div class="no-results">Nenhum resultado encontrado<br>Tente selecionar outros clientes ou alterar os filtros.</div>';
+            const clientsCount = Object.keys(filteredClients).length;
+            
+            document.getElementById('clientsFound').textContent = clientsCount;
+            
+            if (clientsCount === 0) {
+                resultsDiv.innerHTML = '<div class="no-results">Nenhum resultado encontrado<br>Tente pesquisar por outro nome ou alterar os filtros.</div>';
+                document.getElementById('summary').style.display = 'none';
                 return;
             }
-
+            
+            // Calcular totais globais
+            const globalTotals = calculateGlobalTotals(filteredClients);
+            
+            // Atualizar resumo
+            document.getElementById('totalOverdue').textContent = formatCurrency(globalTotals.overdue);
+            document.getElementById('totalFuture').textContent = formatCurrency(globalTotals.future);
+            document.getElementById('totalPaid').textContent = formatCurrency(globalTotals.paid);
+            document.getElementById('totalGeneral').textContent = formatCurrency(globalTotals.general);
+            document.getElementById('clientsCount').textContent = clientsCount;
+            document.getElementById('summary').style.display = 'block';
+            
+            // Gerar HTML dos cards de clientes
             let html = '<div class="client-cards">';
             let colorIndex = 0;
             const gradients = [
@@ -619,23 +747,28 @@
             ];
 
             for (let client in filteredClients) {
+                const clientData = filteredClients[client];
+                const totals = clientData.totals;
                 const gradient = gradients[colorIndex % gradients.length];
-                html += `<div class="client-card">`;
-                html += `<div class="client-header" style="background: ${gradient};">${client}</div>`;
-                html += `<div class="client-titles">`;
-                html += `<table>
-                    <thead>
-                        <tr>
-                            <th>Descrição</th>
-                            <th>Empresa</th>
-                            <th>Vencimento</th>
-                            <th>Valor</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>`;
-
-                filteredClients[client].titles
+                
+                html += `<div class="client-card">
+                    <div class="client-header" style="background: ${gradient}">
+                        <span class="client-name">${client}</span>
+                    </div>
+                    <div class="client-titles">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Descrição</th>
+                                    <th>Empresa</th>
+                                    <th>Vencimento</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+                
+                clientData.titles
                     .sort((a, b) => {
                         const da = serialToDate(a.venc) || new Date(0);
                         const db = serialToDate(b.venc) || new Date(0);
@@ -655,50 +788,43 @@
                             <td>${status}</td>
                         </tr>`;
                     });
-
-                html += `</tbody></table>`;
-                html += `</div>`;
-                html += `<div class="client-totals">
-                    <div class="total-card total-overdue">Vencidos: ${filteredClients[client].totals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
-                    <div class="total-card total-future">A Vencer: ${filteredClients[client].totals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
-                    <div class="total-card total-paid">Quitados: ${filteredClients[client].totals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
-                    <div class="total-card total-general">Total: ${filteredClients[client].totals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                
+                html += `</tbody></table>
+                    </div>
+                    <div class="client-totals">
+                        <div class="total-card total-overdue">Vencidos: ${totals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                        <div class="total-card total-future">A Vencer: ${totals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                        <div class="total-card total-paid">Quitados: ${totals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                        <div class="total-card total-general">Total: ${totals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                    </div>
                 </div>`;
-                html += `</div>`;
+                
                 colorIndex++;
             }
+            
             html += '</div>';
             resultsDiv.innerHTML = html;
+        }
+
+        function formatCurrency(value) {
+            if (isNaN(value) || value === null) return 'R$ 0,00';
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        }
+
+        function performSearch() {
+            showClientCheckboxes();
+            updateResults();
         }
 
         function clearSearch() {
             document.getElementById('searchInput').value = '';
             document.getElementById('autocompleteDropdown').style.display = 'none';
-            document.getElementById('selectAllContainer').style.display = 'none';
             document.getElementById('clientCheckboxes').style.display = 'none';
-            document.getElementById('clientCheckboxes').innerHTML = '<h3>Selecione os Clientes:</h3>';
+            document.getElementById('dateFilters').style.display = 'none';
+            document.getElementById('selectAllContainer').style.display = 'none';
             selectedClients.clear();
-            document.getElementById('onlyOverdue').checked = true;
-            document.getElementById('showFuture').checked = false;
-            document.getElementById('showPaid').checked = false;
-            document.getElementById('clientsFound').textContent = '0';
-            document.getElementById('clientsCount').textContent = '0';
-            document.getElementById('totalOverdue').textContent = 'R$ 0,00';
-            document.getElementById('totalFuture').textContent = 'R$ 0,00';
-            document.getElementById('totalPaid').textContent = 'R$ 0,00';
-            document.getElementById('totalGeneral').textContent = 'R$ 0,00';
-            document.getElementById('summary').style.display = 'none';
-            document.getElementById('results').innerHTML = '<div class="no-results">Nenhum resultado encontrado<br>Tente pesquisar por outro nome ou alterar os filtros.</div>';
-            document.getElementById('pdfPreview').style.display = 'none';
-            document.getElementById('pdfPreview').innerHTML = '';
-        }
-
-        function performSearch() {
-            const query = document.getElementById('searchInput').value.trim();
-            if (query) {
-                showClientCheckboxes();
-                updateResults();
-            }
+            clearDateFilter();
+            updateResults();
         }
 
         function selectAllFromSearch() {
@@ -713,12 +839,8 @@
                     .slice(0, 10);
                 
                 if (matches.length > 0) {
+                    matches.forEach(match => selectedClients.add(match.name));
                     showClientCheckboxes();
-                    document.querySelectorAll('input[name="client"]').forEach(cb => {
-                        cb.checked = true;
-                    });
-                    document.getElementById('selectAllCheckbox').checked = true;
-                    document.getElementById('selectAllCheckbox').indeterminate = false;
                     updateResults();
                 }
             } else {
@@ -728,32 +850,8 @@
         }
 
         function selectAllClients() {
-            // Limpar a busca
-            document.getElementById('searchInput').value = '';
-            document.getElementById('autocompleteDropdown').style.display = 'none';
-            
-            // Mostrar container do checkbox "Selecionar Todos"
-            document.getElementById('selectAllContainer').style.display = 'block';
-            
-            // Criar checkboxes para todos os clientes
-            let html = '<h3>Selecione os Clientes:</h3>';
-            allClientNames.forEach(name => {
-                html += `<label><input type="checkbox" name="client" value="${name}" checked> ${name}</label>`;
-            });
-            document.getElementById('clientCheckboxes').innerHTML = html;
-            document.getElementById('clientCheckboxes').style.display = 'block';
-            
-            // Marcar o checkbox "Selecionar Todos"
-            document.getElementById('selectAllCheckbox').checked = true;
-            document.getElementById('selectAllCheckbox').indeterminate = false;
-            
-            // Adicionar event listeners aos checkboxes
-            document.querySelectorAll('input[name="client"]').forEach(cb => {
-                cb.addEventListener('change', updateSelectAllCheckbox);
-                cb.addEventListener('change', updateResults);
-            });
-            
-            // Atualizar resultados
+            selectedClients = new Set(allClientNames);
+            showClientCheckboxes();
             updateResults();
         }
 
@@ -801,6 +899,24 @@
                 doc.text(`Busca: ${query}`, 20, yPos);
                 yPos += 7;
             }
+            
+            if (dateFilterActive) {
+                let dateText = 'Período: ';
+                // CORREÇÃO: Mostrar as datas exatas selecionadas
+                if (startDateFilter) {
+                    const startDate = new Date(startDateFilter);
+                    startDate.setHours(0, 0, 0, 0);
+                    dateText += `De ${startDate.toLocaleDateString('pt-BR')} `;
+                }
+                if (endDateFilter) {
+                    const endDate = new Date(endDateFilter);
+                    endDate.setHours(0, 0, 0, 0);
+                    dateText += `Até ${endDate.toLocaleDateString('pt-BR')}`;
+                }
+                doc.text(dateText, 20, yPos);
+                yPos += 7;
+            }
+            
             yPos += 5;
 
             let clientIndex = 0;
@@ -846,6 +962,17 @@
                         }
                     }
                 });
+
+                // Aplicar filtro de data
+                if (dateFilterActive) {
+                    clientTitles = clientTitles.filter(title => {
+                        const dueDate = serialToDate(title.venc);
+                        const liqDate = serialToDate(title.liq);
+                        const isPaid = title.liq && liqDate;
+                        const titleDate = isPaid ? liqDate : dueDate;
+                        return isDateInRange(titleDate, startDateFilter, endDateFilter);
+                    });
+                }
 
                 let displayTitles = clientTitles;
 
@@ -917,6 +1044,17 @@
                         }
                     }
                 });
+
+                // Aplicar filtro de data
+                if (dateFilterActive) {
+                    clientTitles = clientTitles.filter(title => {
+                        const dueDate = serialToDate(title.venc);
+                        const liqDate = serialToDate(title.liq);
+                        const isPaid = title.liq && liqDate;
+                        const titleDate = isPaid ? liqDate : dueDate;
+                        return isDateInRange(titleDate, startDateFilter, endDateFilter);
+                    });
+                }
 
                 let displayTitles = clientTitles;
 
@@ -1161,6 +1299,17 @@
                         }
                     }
                 });
+
+                // Aplicar filtro de data
+                if (dateFilterActive) {
+                    clientTitles = clientTitles.filter(title => {
+                        const dueDate = serialToDate(title.venc);
+                        const liqDate = serialToDate(title.liq);
+                        const isPaid = title.liq && liqDate;
+                        const titleDate = isPaid ? liqDate : dueDate;
+                        return isDateInRange(titleDate, startDateFilter, endDateFilter);
+                    });
+                }
 
                 clientTitles.forEach(title => {
                     const dueStr = serialToDate(title.venc) ? serialToDate(title.venc).toLocaleDateString('pt-BR') : 'N/A';
