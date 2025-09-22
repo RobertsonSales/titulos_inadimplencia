@@ -119,17 +119,17 @@
     <div class="container">
         <div class="header">
             <h1>Consulta de Títulos por Cliente</h1>
-            <h1>Quitados ou em aberto (vencidos ou a vencer) </h1>
+            <h3>Quitados ou em aberto (vencidos ou a vencer) </h3>
             <p>Importe sua planilha e consulte os títulos de seus clientes </p>
         </div>
 
         <div class="import-section">
-            <h3>Importe aqui a Planilha com os dados</h3>
+            <h3>Importe aqui uma Planilha válida</h3>
             <div class="file-input">
-                <label for="fileInput">Selecionar Arquivo Excel (xlsx)</label>
+                <label for="fileInput">Importar Arquivo Excel (xlsx)</label>
                 <input type="file" id="fileInput" accept=".xlsx,.xls">
             </div>
-            <p>Formato esperado da planilha: Colunas CLIENTE, VENCIMENTO, DESCRIÇÃO, VALOR, LIQUIDAÇÃO, EMPRESA</p>
+            <p>Formato esperado das Colunas da planilha => CLIENTE, VENCIMENTO, DESCRIÇÃO, VALOR, LIQUIDAÇÃO, EMPRESA</p>
             <p>Arquivo: <span id="fileName">Nenhum arquivo selecionado</span></p>
             <p>Registros carregados: <span id="recordsLoaded">0</span></p>
         </div>
@@ -145,7 +145,7 @@
         </div>
 
         <div class="select-all-container" id="selectAllContainer" style="display: none;">
-            <label><input type="checkbox" id="selectAllCheckbox"> Selecionar/Deselecionar Todos</label>
+            <label><input type="checkbox" id="selectAllCheckbox"> Marcar/Desmarcar Todos</label>
         </div>
 
         <div class="client-checkboxes" id="clientCheckboxes" style="display: none;">
@@ -155,7 +155,7 @@
         <div class="filters">
             <label><input type="checkbox" id="onlyOverdue" checked> Mostrar apenas títulos vencidos ou a vencer hoje</label>
             <label><input type="checkbox" id="showFuture"> Mostrar títulos que ainda não venceram</label>
-            <label><input type="checkbox" id="showPaid"> Mostrar títulos quitados</label>
+            <label><input type="checkbox" id="showPaid"> Mostrar títulos já quitados</label>
         </div>
 
         <div class="results-section">
