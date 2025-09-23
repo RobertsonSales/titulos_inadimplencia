@@ -74,7 +74,7 @@
         .date-input-group { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .date-input-group label { font-weight: 500; color: #555; margin-bottom: 5px; }
         .date-filters input[type="date"] { padding: 8px 12px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px; width: 150px; }
-        .date-buttons { display: flex; gap: 10px; justify-content: center; }
+        .date-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 15px; }
         .date-buttons button { margin: 0; }
         .results-section { padding: 30px; }
         .results-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; text-align: center; }
@@ -649,6 +649,14 @@
             const showPaid = document.getElementById('showPaid').checked;
             const selected = getSelectedClients();
             
+            // CORREÇÃO: Não mostrar resultados se nenhum filtro está selecionado
+            if (!onlyOverdue && !showFuture && !showPaid) {
+                document.getElementById('results').innerHTML = '<div class="no-results">Nenhum resultado encontrado<br>Selecione pelo menos um filtro para visualizar os títulos.</div>';
+                document.getElementById('summary').style.display = 'none';
+                document.getElementById('clientsFound').textContent = '0';
+                return;
+            }
+            
             let filteredClients = {};
             
             // Se não há clientes selecionados, mostrar todos
@@ -856,21 +864,22 @@
         }
 
         function previewPDF() {
+            // CORREÇÃO: Verificar se há pelo menos um filtro selecionado
+            const onlyOverdue = document.getElementById('onlyOverdue').checked;
+            const showFuture = document.getElementById('showFuture').checked;
+            const showPaid = document.getElementById('showPaid').checked;
+            
+            if (!onlyOverdue && !showFuture && !showPaid) {
+                alert('Selecione pelo menos um filtro para gerar o PDF.');
+                return;
+            }
+            
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
             const query = document.getElementById('searchInput').value.trim();
             let yPos = 20;
             let globalTotals = { overdue: 0, future: 0, paid: 0, general: 0 };
-            const onlyOverdue = document.getElementById('onlyOverdue').checked;
-            const showFuture = document.getElementById('showFuture').checked;
-            const showPaid = document.getElementById('showPaid').checked;
             const selected = getSelectedClients();
-
-            // Verificar se há pelo menos um filtro selecionado
-            if (!onlyOverdue && !showFuture && !showPaid) {
-                alert('Selecione pelo menos um filtro para gerar o PDF.');
-                return;
-            }
 
             // Configurações iniciais
             doc.setFont('helvetica', 'bold');
@@ -902,7 +911,6 @@
             
             if (dateFilterActive) {
                 let dateText = 'Período: ';
-                // CORREÇÃO: Mostrar as datas exatas selecionadas
                 if (startDateFilter) {
                     const startDate = new Date(startDateFilter);
                     startDate.setHours(0, 0, 0, 0);
@@ -1258,18 +1266,19 @@
         }
 
         function generateXLSX() {
-            const wb = XLSX.utils.book_new();
-            const selected = getSelectedClients();
+            // CORREÇÃO: Verificar se há pelo menos um filtro selecionado
             const onlyOverdue = document.getElementById('onlyOverdue').checked;
             const showFuture = document.getElementById('showFuture').checked;
             const showPaid = document.getElementById('showPaid').checked;
-            let allData = [];
-
-            // Verificar se há pelo menos um filtro selecionado
+            
             if (!onlyOverdue && !showFuture && !showPaid) {
                 alert('Selecione pelo menos um filtro para gerar o XLSX.');
                 return;
             }
+            
+            const wb = XLSX.utils.book_new();
+            const selected = getSelectedClients();
+            let allData = [];
 
             allData.push(['Cliente', 'Descrição', 'Empresa', 'Vencimento', 'Valor', 'Status']);
 
