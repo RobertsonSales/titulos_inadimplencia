@@ -66,6 +66,14 @@
         .btn-secondary { background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%); color: white; }
         .btn-xlsx { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; }
         .btn-select-all { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; }
+        .btn-crud { 
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); 
+            color: white; 
+            height: 46px; /* Altura igual aos outros botões */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
         .filters { padding: 20px 30px; background: white; border-bottom: 1px solid #eee; display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; }
         .filters label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 400; color: #555; }
         .filters input[type="checkbox"] { width: 18px; height: 18px; }
@@ -98,7 +106,7 @@
         th { background: #f8f9fa; font-weight: 500; color: #555; }
         .paid-title { background-color: #f8f9fa; color: #6c757d; }
         .no-results { text-align: center; color: #7f8c8d; padding: 60px 20px; background: #f8f9fa; border-radius: 15px; font-size: 1.1em; }
-        .pdf-btn, .xlsx-btn, .select-all-btn { display: inline-block; margin: 0 10px 30px; width: 220px; font-size: 16px; }
+        .pdf-btn, .xlsx-btn, .select-all-btn, .crud-btn { display: inline-block; margin: 0 10px 30px; width: 220px; font-size: 16px; }
         .pdf-btn { background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; }
         .xlsx-btn { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); color: white; }
         .select-all-btn { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: white; }
@@ -112,16 +120,164 @@
         .pdf-preview { display: none; margin-top: 20px; padding: 20px; background: white; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
         .pdf-preview canvas { max-width: 100%; height: auto; }
         .client-name { font-weight: 700; color: #000 !important; }
+        .company-summary { margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 10px; }
+        .company-summary h4 { margin: 0 0 10px 0; color: #333; }
+        .company-totals { display: flex; flex-wrap: wrap; gap: 10px; }
+        .company-total-card { padding: 8px 12px; border-radius: 5px; font-size: 0.9em; }
+        
+        /* Estilos para o modal CRUD */
+        .crud-modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            z-index: 2000; 
+            overflow-y: auto;
+        }
+        .crud-content { 
+            background: white; 
+            margin: 50px auto; 
+            padding: 30px; 
+            border-radius: 15px; 
+            width: 95%; /* Ampliado para usar mais espaço lateral */
+            max-width: 1200px; /* Aumentado para caber mais conteúdo */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .crud-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+            padding-bottom: 15px; 
+            border-bottom: 1px solid #eee;
+        }
+        .crud-header h2 { margin: 0; color: #34495e; }
+        .close-crud { 
+            background: none; 
+            border: none; 
+            font-size: 24px; 
+            cursor: pointer; 
+            color: #7f8c8d; 
+            transition: color 0.3s;
+        }
+        .close-crud:hover { color: #e74c3c; }
+        .crud-form { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: #555; }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            font-size: 14px; 
+            box-sizing: border-box;
+        }
+        .form-group.full-width { grid-column: 1 / -1; }
+        .crud-buttons { 
+            grid-column: 1 / -1; 
+            display: flex; 
+            justify-content: flex-end; 
+            gap: 10px; 
+            margin-top: 20px;
+        }
+        .crud-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 20px;
+            table-layout: fixed; /* Para controlar melhor a largura das colunas */
+        }
+        .crud-table th, .crud-table td { 
+            padding: 12px; 
+            text-align: left; 
+            border-bottom: 1px solid #eee;
+            word-wrap: break-word; /* Quebra palavras longas */
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* Ajustes específicos para as colunas da tabela CRUD */
+        .crud-table th:nth-child(1), .crud-table td:nth-child(1) { width: 18%; } /* Cliente */
+        .crud-table th:nth-child(2), .crud-table td:nth-child(2) { width: 10%; } /* Vencimento */
+        .crud-table th:nth-child(3), .crud-table td:nth-child(3) { width: 20%; } /* Descrição */
+        .crud-table th:nth-child(4), .crud-table td:nth-child(4) { width: 12%; } /* Valor */
+        .crud-table th:nth-child(5), .crud-table td:nth-child(5) { width: 12%; } /* Liquidação */
+        .crud-table th:nth-child(6), .crud-table td:nth-child(6) { width: 18%; } /* Empresa */
+        .crud-table th:nth-child(7), .crud-table td:nth-child(7) { width: 10%; } /* Ações */
+        .crud-table th { 
+            background: #f8f9fa; 
+            font-weight: 500;
+        }
+        .crud-table tr:hover { background: #f5f5f5; }
+        .action-buttons { display: flex; gap: 5px; }
+        .btn-edit, .btn-delete { 
+            padding: 5px 10px; 
+            border: none; 
+            border-radius: 3px; 
+            cursor: pointer; 
+            font-size: 12px;
+            white-space: nowrap; /* Impede quebra de linha nos botões */
+        }
+        .btn-edit { background: #3498db; color: white; }
+        .btn-delete { background: #e74c3c; color: white; }
+        .add-record-btn { 
+            background: #2ecc71; 
+            color: white; 
+            border: none; 
+            padding: 10px 15px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin-bottom: 15px;
+        }
+        .search-crud { 
+            width: 100%; 
+            padding: 10px; 
+            margin-bottom: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px;
+        }
+        
+        /* Estilos para filtro de empresas - OTIMIZADO */
+        .company-filters { 
+            padding: 20px 30px; 
+            background: white; 
+            border-bottom: 1px solid #eee; 
+            display: none; 
+            flex-wrap: wrap; 
+            gap: 15px;
+            justify-content: center; /* Centraliza os checkboxes */
+        }
+        .company-filters h3 { 
+            width: 100%; 
+            margin-bottom: 10px; 
+            color: #333; 
+            text-align: center; /* Centraliza o título */
+        }
+        .company-filters label { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            cursor: pointer; 
+            margin: 0 10px; /* Espaçamento lateral entre os checkboxes */
+            white-space: nowrap; /* Impede quebra de linha nos labels */
+        }
+        .company-filters input[type="checkbox"] { width: 18px; height: 18px; }
+        
         @media (max-width: 768px) { 
             .container { margin: 10px; border-radius: 10px; }
             .header { padding: 30px 15px; }
             .header h1 { font-size: 2em; }
-            .filters, .client-checkboxes, .date-filters { flex-direction: column; gap: 15px; align-items: center; }
+            .filters, .client-checkboxes, .date-filters, .company-filters { flex-direction: column; gap: 15px; align-items: center; }
             .date-inputs-container { flex-direction: column; }
             .client-cards { grid-template-columns: 1fr; gap: 15px; }
             .results-section, .search-container, .import-section { padding: 20px; }
-            .pdf-btn, .xlsx-btn, .select-all-btn { display: block; margin: 0 auto 15px; width: 100%; }
+            .pdf-btn, .xlsx-btn, .select-all-btn, .crud-btn { display: block; margin: 0 auto 15px; width: 100%; }
             .autocomplete-dropdown { left: 20px; right: 20px; }
+            .crud-form { grid-template-columns: 1fr; }
+            .crud-content { width: 95%; margin: 20px auto; padding: 20px; }
+            .crud-table { font-size: 12px; } /* Reduz fonte em telas pequenas */
+            .crud-table th, .crud-table td { padding: 8px 4px; } /* Reduz padding em telas pequenas */
         }
     </style>
 </head>
@@ -151,6 +307,7 @@
                 <button class="btn-primary" id="searchButton">Pesquisar</button>
                 <button class="btn-secondary" id="clearButton">Limpar</button>
                 <button class="btn-select-all" id="selectAllButton">Selecionar Todos</button>
+                <button class="crud-btn" id="crudButton">Gerenciar Registros (CRUD)</button>
             </div>
         </div>
 
@@ -179,10 +336,17 @@
             </div>
         </div>
 
+        <!-- Novo Filtro por Empresa Emissora - OTIMIZADO -->
+        <div class="company-filters" id="companyFilters">
+            <h3>Filtrar por Empresa Emissora:</h3>
+            <!-- As checkboxes serão geradas dinamicamente via JavaScript -->
+        </div>
+
         <div class="filters">
             <label><input type="checkbox" id="onlyOverdue" checked> Mostrar apenas títulos vencidos ou a vencer hoje</label>
             <label><input type="checkbox" id="showFuture"> Mostrar títulos que ainda não venceram</label>
             <label><input type="checkbox" id="showPaid"> Mostrar títulos já quitados</label>
+            <label><input type="checkbox" id="showCompanyFilter"> Mostrar filtro por empresa</label>
         </div>
 
         <div class="results-section">
@@ -205,12 +369,87 @@
         </div>
 
         <div style="text-align: center; padding: 20px;">
-            <button class="select-all-btn" id="selectAllClientsButton">Selecionar Todos os Clientes</button>
             <button class="pdf-btn" id="pdfButton">Visualizar PDF</button>
             <button class="xlsx-btn" id="xlsxButton">Gerar XLSX</button>
         </div>
         
         <div class="pdf-preview" id="pdfPreview"></div>
+    </div>
+
+    <!-- Modal CRUD - AMPLIADO -->
+    <div id="crudModal" class="crud-modal">
+        <div class="crud-content">
+            <div class="crud-header">
+                <h2>Gerenciar Registros de Títulos</h2>
+                <button class="close-crud">&times;</button>
+            </div>
+            
+            <div class="crud-controls">
+                <input type="text" id="searchCrud" class="search-crud" placeholder="Buscar registros...">
+                <button class="add-record-btn" id="addRecordBtn">+ Adicionar Novo Registro</button>
+            </div>
+            
+            <div id="crudFormContainer" style="display: none;">
+                <h3 id="formTitle">Adicionar Novo Registro</h3>
+                <form id="crudForm" class="crud-form">
+                    <input type="hidden" id="recordId">
+                    
+                    <div class="form-group">
+                        <label for="crudCliente">Cliente *</label>
+                        <input type="text" id="crudCliente" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="crudVencimento">Vencimento *</label>
+                        <input type="date" id="crudVencimento" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="crudDescricao">Descrição *</label>
+                        <input type="text" id="crudDescricao" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="crudValor">Valor *</label>
+                        <input type="number" id="crudValor" step="0.01" min="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="crudLiquidacao">Liquidação</label>
+                        <input type="date" id="crudLiquidacao">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="crudEmpresa">Empresa</label>
+                        <input type="text" id="crudEmpresa">
+                    </div>
+                    
+                    <div class="crud-buttons">
+                        <button type="button" class="btn-secondary" id="cancelForm">Cancelar</button>
+                        <button type="submit" class="btn-primary" id="saveRecord">Salvar Registro</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div id="crudTableContainer">
+                <table class="crud-table">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Vencimento</th>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Liquidação</th>
+                            <th>Empresa</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="crudTableBody">
+                        <!-- Os registros serão inseridos aqui via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -228,11 +467,17 @@
         let clients = {};
         let allClientNames = [];
         let selectedClients = new Set();
+        let selectedCompanies = new Set(); // Novo: empresas selecionadas
+        let allCompanyNames = []; // Novo: lista de todas as empresas
         const currentDate = new Date(); // usa data atual
         const serialOffset = 25569;
         let dateFilterActive = false;
         let startDateFilter = null;
         let endDateFilter = null;
+        
+        // Variáveis para o CRUD
+        let editingRecordId = null;
+        let allRecords = [];
 
         // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
@@ -243,18 +488,32 @@
             document.getElementById('clearButton').addEventListener('click', clearSearch);
             document.getElementById('selectAllButton').addEventListener('click', selectAllFromSearch);
             document.getElementById('selectAllCheckbox').addEventListener('change', toggleAllClients);
-            document.getElementById('selectAllClientsButton').addEventListener('click', selectAllClients);
             document.getElementById('onlyOverdue').addEventListener('change', updateResults);
             document.getElementById('showFuture').addEventListener('change', updateResults);
             document.getElementById('showPaid').addEventListener('change', updateResults);
+            document.getElementById('showCompanyFilter').addEventListener('change', toggleCompanyFilter);
             document.getElementById('pdfButton').addEventListener('click', previewPDF);
             document.getElementById('xlsxButton').addEventListener('click', generateXLSX);
             document.getElementById('applyDateFilter').addEventListener('click', applyDateFilter);
             document.getElementById('clearDateFilter').addEventListener('click', clearDateFilter);
             
+            // Event listeners para o CRUD
+            document.getElementById('crudButton').addEventListener('click', openCrudModal);
+            document.querySelector('.close-crud').addEventListener('click', closeCrudModal);
+            document.getElementById('addRecordBtn').addEventListener('click', showAddForm);
+            document.getElementById('cancelForm').addEventListener('click', cancelForm);
+            document.getElementById('crudForm').addEventListener('submit', saveRecord);
+            document.getElementById('searchCrud').addEventListener('keyup', filterCrudTable);
+            
+            // Fechar modal ao clicar fora dele
+            document.getElementById('crudModal').addEventListener('click', function(e) {
+                if (e.target === this) closeCrudModal();
+            });
+            
             // Carregar dados de exemplo
             data = sampleData;
             processData();
+            updateCrudTable();
         });
 
         // Converte serial do Excel pra Date ou aceita strings ISO ou dd/mm/yyyy - CORRIGIDO
@@ -332,6 +591,7 @@
                 const worksheet = workbook.Sheets[sheetName];
                 data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                 processData();
+                updateCrudTable();
             };
             reader.readAsBinaryString(file);
         }
@@ -368,6 +628,8 @@
         function processData() {
             clients = {};
             allClientNames = [];
+            allCompanyNames = []; // Novo: resetar lista de empresas
+            allRecords = [];
             let loadedCount = 0;
             if (!Array.isArray(data) || data.length === 0) return;
 
@@ -393,12 +655,76 @@
                     allClientNames.push(cliente);
                 }
 
-                clients[cliente].titles.push({ venc, desc, valor, liq, emissora });
+                const record = { 
+                    id: i, 
+                    cliente, 
+                    venc, 
+                    desc, 
+                    valor, 
+                    liq, 
+                    emissora 
+                };
+                
+                clients[cliente].titles.push(record);
+                allRecords.push(record);
+                
+                // Novo: adicionar empresa à lista se não existir
+                if (emissora && !allCompanyNames.includes(emissora)) {
+                    allCompanyNames.push(emissora);
+                }
+                
                 loadedCount++;
             }
 
             allClientNames.sort((a,b) => a.localeCompare(b));
+            allCompanyNames.sort((a,b) => a.localeCompare(b)); // Novo: ordenar empresas
             document.getElementById('recordsLoaded').textContent = loadedCount;
+            
+            // Novo: atualizar filtro de empresas
+            updateCompanyFilters();
+        }
+
+        // Novo: função para atualizar os filtros de empresa
+        function updateCompanyFilters() {
+            const companyFilters = document.getElementById('companyFilters');
+            let html = '<h3>Filtrar por Empresa Emissora:</h3>';
+            
+            allCompanyNames.forEach(company => {
+                const isChecked = selectedCompanies.has(company) ? 'checked' : '';
+                html += `<label><input type="checkbox" name="company" value="${company}" ${isChecked}> ${company}</label>`;
+            });
+            
+            companyFilters.innerHTML = html;
+            
+            // Adicionar event listeners aos checkboxes de empresa
+            document.querySelectorAll('input[name="company"]').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (this.checked) {
+                        selectedCompanies.add(this.value);
+                    } else {
+                        selectedCompanies.delete(this.value);
+                    }
+                    updateResults();
+                });
+            });
+        }
+
+        // Novo: função para mostrar/ocultar filtro de empresas
+        function toggleCompanyFilter() {
+            const showCompanyFilter = document.getElementById('showCompanyFilter').checked;
+            const companyFilters = document.getElementById('companyFilters');
+            
+            if (showCompanyFilter) {
+                companyFilters.style.display = 'flex';
+                // Selecionar todas as empresas por padrão
+                selectedCompanies = new Set(allCompanyNames);
+                updateCompanyFilters();
+            } else {
+                companyFilters.style.display = 'none';
+                selectedCompanies.clear();
+            }
+            
+            updateResults();
         }
 
         function calculateTotalByCategory(titles) {
@@ -440,6 +766,56 @@
             });
             
             return { overdue, future, paid, general: overdue + future + paid };
+        }
+
+        // Nova função para calcular totais por empresa
+        function calculateTotalsByCompany(titles) {
+            const companies = {};
+            
+            titles.forEach(title => {
+                const company = title.emissora || 'Não informada';
+                if (!companies[company]) {
+                    companies[company] = { overdue: 0, future: 0, paid: 0, general: 0 };
+                }
+                
+                const dueDate = serialToDate(title.venc);
+                const liqDate = serialToDate(title.liq);
+                const isPaid = title.liq && liqDate;
+                const onlyOverdue = document.getElementById('onlyOverdue').checked;
+                const showFuture = document.getElementById('showFuture').checked;
+                const showPaid = document.getElementById('showPaid').checked;
+                
+                // Se o título está quitado
+                if (isPaid) {
+                    if (showPaid) {
+                        companies[company].paid += Number(title.valor || 0);
+                    }
+                } 
+                // Se o título está em aberto
+                else {
+                    if (dueDate) {
+                        if (dueDate <= currentDate) {
+                            if (onlyOverdue) {
+                                companies[company].overdue += Number(title.valor || 0);
+                            }
+                        } else {
+                            if (showFuture) {
+                                companies[company].future += Number(title.valor || 0);
+                            }
+                        }
+                    } else {
+                        // Se não tem data de vencimento, considerar como vencido
+                        if (onlyOverdue) {
+                            companies[company].overdue += Number(title.valor || 0);
+                        }
+                    }
+                }
+                
+                // Atualizar total geral da empresa
+                companies[company].general = companies[company].overdue + companies[company].future + companies[company].paid;
+            });
+            
+            return companies;
         }
 
         function calculateGlobalTotals(filteredClients) {
@@ -617,6 +993,33 @@
             updateResults();
         }
 
+        // NOVO: Função para limpar todos os filtros
+        function clearAllFilters() {
+            // Limpar busca
+            document.getElementById('searchInput').value = '';
+            document.getElementById('autocompleteDropdown').style.display = 'none';
+            
+            // Limpar seleção de clientes
+            document.getElementById('clientCheckboxes').style.display = 'none';
+            document.getElementById('selectAllContainer').style.display = 'none';
+            selectedClients.clear();
+            
+            // Limpar filtro de data
+            clearDateFilter();
+            
+            // Limpar filtro de empresas
+            document.getElementById('showCompanyFilter').checked = false;
+            document.getElementById('companyFilters').style.display = 'none';
+            selectedCompanies.clear();
+            
+            // Limpar visualização do PDF
+            document.getElementById('pdfPreview').style.display = 'none';
+            document.getElementById('pdfPreview').innerHTML = '';
+            
+            // Atualizar resultados
+            updateResults();
+        }
+
         function isDateInRange(date, start, end) {
             if (!date) return false;
             
@@ -673,7 +1076,7 @@
                 }
             }
             
-            // Aplicar filtros de data e status aos títulos de cada cliente
+            // Aplicar filtros de data, status e empresa aos títulos de cada cliente
             for (let client in filteredClients) {
                 const clientTitles = filteredClients[client].titles;
                 const filteredTitles = clientTitles.filter(title => {
@@ -685,6 +1088,14 @@
                     if (dateFilterActive) {
                         const titleDate = isPaid ? liqDate : dueDate;
                         if (!isDateInRange(titleDate, startDateFilter, endDateFilter)) {
+                            return false;
+                        }
+                    }
+                    
+                    // Novo: Filtro por empresa
+                    if (selectedCompanies.size > 0) {
+                        const company = title.emissora || 'Não informada';
+                        if (!selectedCompanies.has(company)) {
                             return false;
                         }
                     }
@@ -759,6 +1170,9 @@
                 const totals = clientData.totals;
                 const gradient = gradients[colorIndex % gradients.length];
                 
+                // Calcular totais por empresa para este cliente
+                const companyTotals = calculateTotalsByCompany(clientData.titles);
+                
                 html += `<div class="client-card">
                     <div class="client-header" style="background: ${gradient}">
                         <span class="client-name">${client}</span>
@@ -799,6 +1213,26 @@
                 
                 html += `</tbody></table>
                     </div>
+                    <div class="company-summary">
+                        <h4>Resumo por Empresa Emissora:</h4>
+                        <div class="company-totals">`;
+                
+                // Adicionar resumo por empresa
+                for (let company in companyTotals) {
+                    const companyTotal = companyTotals[company];
+                    if (companyTotal.general > 0) {
+                        html += `<div class="company-total-card" style="background: #f0f0f0; margin: 5px; padding: 8px; border-radius: 5px;">
+                            <strong>${company}</strong><br>
+                            Vencidos: ${formatCurrency(companyTotal.overdue)}<br>
+                            A Vencer: ${formatCurrency(companyTotal.future)}<br>
+                            Quitados: ${formatCurrency(companyTotal.paid)}<br>
+                            <strong>Total: ${formatCurrency(companyTotal.general)}</strong>
+                        </div>`;
+                    }
+                }
+                
+                html += `</div>
+                    </div>
                     <div class="client-totals">
                         <div class="total-card total-overdue">Vencidos: ${totals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
                         <div class="total-card total-future">A Vencer: ${totals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
@@ -825,14 +1259,7 @@
         }
 
         function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('autocompleteDropdown').style.display = 'none';
-            document.getElementById('clientCheckboxes').style.display = 'none';
-            document.getElementById('dateFilters').style.display = 'none';
-            document.getElementById('selectAllContainer').style.display = 'none';
-            selectedClients.clear();
-            clearDateFilter();
-            updateResults();
+            clearAllFilters(); // Agora limpa todos os filtros
         }
 
         function selectAllFromSearch() {
@@ -863,6 +1290,201 @@
             updateResults();
         }
 
+        // ========== FUNÇÕES CRUD ==========
+
+        function openCrudModal() {
+            document.getElementById('crudModal').style.display = 'block';
+            updateCrudTable();
+        }
+
+        function closeCrudModal() {
+            document.getElementById('crudModal').style.display = 'none';
+            cancelForm();
+        }
+
+        function showAddForm() {
+            document.getElementById('formTitle').textContent = 'Adicionar Novo Registro';
+            document.getElementById('crudFormContainer').style.display = 'block';
+            document.getElementById('crudTableContainer').style.display = 'none';
+            document.getElementById('recordId').value = '';
+            document.getElementById('crudCliente').value = '';
+            document.getElementById('crudVencimento').value = '';
+            document.getElementById('crudDescricao').value = '';
+            document.getElementById('crudValor').value = '';
+            document.getElementById('crudLiquidacao').value = '';
+            document.getElementById('crudEmpresa').value = '';
+            editingRecordId = null;
+        }
+
+        function cancelForm() {
+            document.getElementById('crudFormContainer').style.display = 'none';
+            document.getElementById('crudTableContainer').style.display = 'block';
+            editingRecordId = null;
+        }
+
+        function saveRecord(e) {
+            e.preventDefault();
+            
+            const cliente = document.getElementById('crudCliente').value.trim();
+            const vencimento = document.getElementById('crudVencimento').value;
+            const descricao = document.getElementById('crudDescricao').value.trim();
+            const valor = parseFloat(document.getElementById('crudValor').value);
+            const liquidacao = document.getElementById('crudLiquidacao').value;
+            const empresa = document.getElementById('crudEmpresa').value.trim();
+            
+            if (!cliente || !vencimento || !descricao || isNaN(valor)) {
+                alert('Por favor, preencha todos os campos obrigatórios (*) corretamente.');
+                return;
+            }
+            
+            if (editingRecordId !== null) {
+                // Atualizar registro existente
+                const recordIndex = allRecords.findIndex(r => r.id === editingRecordId);
+                if (recordIndex !== -1) {
+                    allRecords[recordIndex] = {
+                        id: editingRecordId,
+                        cliente,
+                        venc: vencimento,
+                        desc: descricao,
+                        valor,
+                        liq: liquidacao,
+                        emissora: empresa
+                    };
+                }
+            } else {
+                // Adicionar novo registro
+                const newId = allRecords.length > 0 ? Math.max(...allRecords.map(r => r.id)) + 1 : 1;
+                allRecords.push({
+                    id: newId,
+                    cliente,
+                    venc: vencimento,
+                    desc: descricao,
+                    valor,
+                    liq: liquidacao,
+                    emissora: empresa
+                });
+            }
+            
+            // Atualizar a estrutura de dados principal
+            updateDataFromRecords();
+            
+            // Atualizar a tabela CRUD
+            updateCrudTable();
+            
+            // Fechar o formulário
+            cancelForm();
+            
+            alert('Registro salvo com sucesso!');
+        }
+
+        function editRecord(id) {
+            const record = allRecords.find(r => r.id === id);
+            if (!record) return;
+            
+            document.getElementById('formTitle').textContent = 'Editar Registro';
+            document.getElementById('crudFormContainer').style.display = 'block';
+            document.getElementById('crudTableContainer').style.display = 'none';
+            
+            document.getElementById('recordId').value = record.id;
+            document.getElementById('crudCliente').value = record.cliente;
+            document.getElementById('crudVencimento').value = record.venc.split(' ')[0]; // Remove hora se houver
+            document.getElementById('crudDescricao').value = record.desc;
+            document.getElementById('crudValor').value = record.valor;
+            document.getElementById('crudLiquidacao').value = record.liq ? record.liq.split(' ')[0] : '';
+            document.getElementById('crudEmpresa').value = record.emissora || '';
+            
+            editingRecordId = id;
+        }
+
+        function deleteRecord(id) {
+            if (!confirm('Tem certeza que deseja excluir este registro?')) return;
+            
+            allRecords = allRecords.filter(r => r.id !== id);
+            updateDataFromRecords();
+            updateCrudTable();
+            
+            alert('Registro excluído com sucesso!');
+        }
+
+        function updateDataFromRecords() {
+            // Reconstruir a estrutura de dados a partir dos registros
+            clients = {};
+            allClientNames = [];
+            allCompanyNames = [];
+            
+            allRecords.forEach(record => {
+                if (!clients[record.cliente]) {
+                    clients[record.cliente] = { titles: [] };
+                    allClientNames.push(record.cliente);
+                }
+                
+                clients[record.cliente].titles.push(record);
+                
+                // Atualizar lista de empresas
+                if (record.emissora && !allCompanyNames.includes(record.emissora)) {
+                    allCompanyNames.push(record.emissora);
+                }
+            });
+            
+            allClientNames.sort((a,b) => a.localeCompare(b));
+            allCompanyNames.sort((a,b) => a.localeCompare(b));
+            document.getElementById('recordsLoaded').textContent = allRecords.length;
+            
+            // Atualizar filtro de empresas
+            updateCompanyFilters();
+            
+            // Atualizar os resultados exibidos
+            updateResults();
+        }
+
+        function updateCrudTable() {
+            const tableBody = document.getElementById('crudTableBody');
+            const searchTerm = document.getElementById('searchCrud').value.toLowerCase();
+            
+            let filteredRecords = allRecords;
+            
+            if (searchTerm) {
+                filteredRecords = allRecords.filter(record => 
+                    record.cliente.toLowerCase().includes(searchTerm) ||
+                    record.desc.toLowerCase().includes(searchTerm) ||
+                    (record.emissora && record.emissora.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            let html = '';
+            
+            if (filteredRecords.length === 0) {
+                html = '<tr><td colspan="7" style="text-align: center;">Nenhum registro encontrado</td></tr>';
+            } else {
+                filteredRecords.forEach(record => {
+                    const vencimento = serialToDate(record.venc);
+                    const liquidacao = record.liq ? serialToDate(record.liq) : null;
+                    
+                    html += `
+                        <tr>
+                            <td title="${record.cliente}">${record.cliente}</td>
+                            <td>${vencimento ? vencimento.toLocaleDateString('pt-BR') : 'N/A'}</td>
+                            <td title="${record.desc}">${record.desc}</td>
+                            <td>${formatCurrency(record.valor)}</td>
+                            <td>${liquidacao ? liquidacao.toLocaleDateString('pt-BR') : (record.liq ? record.liq : 'Em aberto')}</td>
+                            <td title="${record.emissora || 'Não informada'}">${record.emissora || 'Não informada'}</td>
+                            <td class="action-buttons">
+                                <button class="btn-edit" onclick="editRecord(${record.id})">Editar</button>
+                                <button class="btn-delete" onclick="deleteRecord(${record.id})">Excluir</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+            
+            tableBody.innerHTML = html;
+        }
+
+        function filterCrudTable() {
+            updateCrudTable();
+        }
+
+        // ========== FUNÇÃO PREVIEW PDF (RESTAURADA) ==========
         function previewPDF() {
             // CORREÇÃO: Verificar se há pelo menos um filtro selecionado
             const onlyOverdue = document.getElementById('onlyOverdue').checked;
@@ -906,6 +1528,19 @@
             
             if (query) {
                 doc.text(`Busca: ${query}`, 20, yPos);
+                yPos += 7;
+            }
+            
+            // Novo: Informar empresas selecionadas no PDF
+            if (selectedCompanies.size > 0) {
+                let companiesText = 'Empresas: ';
+                const companiesArray = Array.from(selectedCompanies);
+                if (companiesArray.length <= 3) {
+                    companiesText += companiesArray.join(', ');
+                } else {
+                    companiesText += `${companiesArray.length} empresas selecionadas`;
+                }
+                doc.text(companiesText, 20, yPos);
                 yPos += 7;
             }
             
@@ -979,6 +1614,14 @@
                         const isPaid = title.liq && liqDate;
                         const titleDate = isPaid ? liqDate : dueDate;
                         return isDateInRange(titleDate, startDateFilter, endDateFilter);
+                    });
+                }
+
+                // Novo: Aplicar filtro de empresa
+                if (selectedCompanies.size > 0) {
+                    clientTitles = clientTitles.filter(title => {
+                        const company = title.emissora || 'Não informada';
+                        return selectedCompanies.has(company);
                     });
                 }
 
@@ -1064,11 +1707,20 @@
                     });
                 }
 
+                // Novo: Aplicar filtro de empresa
+                if (selectedCompanies.size > 0) {
+                    clientTitles = clientTitles.filter(title => {
+                        const company = title.emissora || 'Não informada';
+                        return selectedCompanies.has(company);
+                    });
+                }
+
                 let displayTitles = clientTitles;
 
                 if (displayTitles.length === 0) continue;
 
                 const totals = calculateTotalByCategory(displayTitles);
+                const companyTotals = calculateTotalsByCompany(displayTitles);
 
                 if (yPos > 250) {
                     doc.addPage();
@@ -1168,6 +1820,60 @@
                         
                         yPos += rowHeight + 4;
                     });
+                    
+                    yPos += 5;
+                }
+
+                // Resumo por empresa no PDF
+                if (Object.keys(companyTotals).length > 0) {
+                    if (yPos > 240) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                    
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(12);
+                    doc.setTextColor(52, 73, 94);
+                    doc.text('Resumo por Empresa Emissora:', 20, yPos);
+                    yPos += 8;
+                    
+                    for (let company in companyTotals) {
+                        if (yPos > 270) {
+                            doc.addPage();
+                            yPos = 20;
+                        }
+                        
+                        const companyTotal = companyTotals[company];
+                        if (companyTotal.general > 0) {
+                            doc.setFontSize(10);
+                            doc.setTextColor(0, 0, 0);
+                            doc.text(`${company}:`, 25, yPos);
+                            yPos += 5;
+                            
+                            if (companyTotal.overdue > 0) {
+                                doc.setTextColor(198, 40, 40);
+                                doc.text(`  Vencidos: ${formatCurrency(companyTotal.overdue)}`, 25, yPos);
+                                yPos += 5;
+                            }
+                            
+                            if (companyTotal.future > 0) {
+                                doc.setTextColor(39, 174, 96);
+                                doc.text(`  A Vencer: ${formatCurrency(companyTotal.future)}`, 25, yPos);
+                                yPos += 5;
+                            }
+                            
+                            if (companyTotal.paid > 0) {
+                                doc.setTextColor(108, 117, 125);
+                                doc.text(`  Quitados: ${formatCurrency(companyTotal.paid)}`, 25, yPos);
+                                yPos += 5;
+                            }
+                            
+                            doc.setTextColor(0, 0, 0);
+                            doc.setFont('helvetica', 'bold');
+                            doc.text(`  Total: ${formatCurrency(companyTotal.general)}`, 25, yPos);
+                            yPos += 8;
+                        }
+                    }
                     
                     yPos += 5;
                 }
@@ -1320,6 +2026,14 @@
                     });
                 }
 
+                // Novo: Aplicar filtro de empresa
+                if (selectedCompanies.size > 0) {
+                    clientTitles = clientTitles.filter(title => {
+                        const company = title.emissora || 'Não informada';
+                        return selectedCompanies.has(company);
+                    });
+                }
+
                 clientTitles.forEach(title => {
                     const dueStr = serialToDate(title.venc) ? serialToDate(title.venc).toLocaleDateString('pt-BR') : 'N/A';
                     const valorNum = Number(title.valor || 0);
@@ -1390,6 +2104,8 @@
         // Adicionei exemplos de dados para demonstração
         window.selectClient = selectClient;
         window.downloadPDF = downloadPDF;
+        window.editRecord = editRecord;
+        window.deleteRecord = deleteRecord;
     </script>
 </body>
 </html>
