@@ -69,7 +69,7 @@
         .btn-crud { 
             background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%); 
             color: white; 
-            height: 46px; /* Altura igual aos outros botões */
+            height: 46px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -125,7 +125,7 @@
         .company-totals { display: flex; flex-wrap: wrap; gap: 10px; }
         .company-total-card { padding: 8px 12px; border-radius: 5px; font-size: 0.9em; }
         
-        /* Estilos para o modal CRUD */
+        /* Estilos para o modal CRUD - CORRIGIDOS */
         .crud-modal { 
             display: none; 
             position: fixed; 
@@ -142,8 +142,8 @@
             margin: 50px auto; 
             padding: 30px; 
             border-radius: 15px; 
-            width: 95%; /* Ampliado para usar mais espaço lateral */
-            max-width: 1200px; /* Aumentado para caber mais conteúdo */
+            width: 95%;
+            max-width: 1200px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         .crud-header { 
@@ -187,37 +187,44 @@
             width: 100%; 
             border-collapse: collapse; 
             margin-top: 20px;
-            table-layout: fixed; /* Para controlar melhor a largura das colunas */
+            table-layout: fixed;
         }
         .crud-table th, .crud-table td { 
             padding: 12px; 
             text-align: left; 
             border-bottom: 1px solid #eee;
-            word-wrap: break-word; /* Quebra palavras longas */
+            word-wrap: break-word;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        /* Ajustes específicos para as colunas da tabela CRUD */
-        .crud-table th:nth-child(1), .crud-table td:nth-child(1) { width: 18%; } /* Cliente */
-        .crud-table th:nth-child(2), .crud-table td:nth-child(2) { width: 10%; } /* Vencimento */
-        .crud-table th:nth-child(3), .crud-table td:nth-child(3) { width: 20%; } /* Descrição */
-        .crud-table th:nth-child(4), .crud-table td:nth-child(4) { width: 12%; } /* Valor */
-        .crud-table th:nth-child(5), .crud-table td:nth-child(5) { width: 12%; } /* Liquidação */
-        .crud-table th:nth-child(6), .crud-table td:nth-child(6) { width: 18%; } /* Empresa */
-        .crud-table th:nth-child(7), .crud-table td:nth-child(7) { width: 10%; } /* Ações */
+        /* CORREÇÃO: Ajustes específicos para as colunas da tabela CRUD */
+        .crud-table th:nth-child(1), .crud-table td:nth-child(1) { width: 18%; }
+        .crud-table th:nth-child(2), .crud-table td:nth-child(2) { width: 10%; }
+        .crud-table th:nth-child(3), .crud-table td:nth-child(3) { width: 18%; }
+        .crud-table th:nth-child(4), .crud-table td:nth-child(4) { width: 12%; }
+        .crud-table th:nth-child(5), .crud-table td:nth-child(5) { width: 12%; }
+        .crud-table th:nth-child(6), .crud-table td:nth-child(6) { width: 18%; }
+        .crud-table th:nth-child(7), .crud-table td:nth-child(7) { width: 12%; min-width: 140px; }
         .crud-table th { 
             background: #f8f9fa; 
             font-weight: 500;
         }
         .crud-table tr:hover { background: #f5f5f5; }
-        .action-buttons { display: flex; gap: 5px; }
+        .action-buttons { 
+            display: flex; 
+            gap: 8px;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+        }
         .btn-edit, .btn-delete { 
-            padding: 5px 10px; 
+            padding: 8px 12px;
             border: none; 
-            border-radius: 3px; 
+            border-radius: 4px; 
             cursor: pointer; 
             font-size: 12px;
-            white-space: nowrap; /* Impede quebra de linha nos botões */
+            white-space: nowrap;
+            min-width: 60px;
+            flex-shrink: 0;
         }
         .btn-edit { background: #3498db; color: white; }
         .btn-delete { background: #e74c3c; color: white; }
@@ -238,7 +245,7 @@
             border-radius: 5px;
         }
         
-        /* Estilos para filtro de empresas - OTIMIZADO */
+        /* Estilos para filtro de empresas */
         .company-filters { 
             padding: 20px 30px; 
             background: white; 
@@ -246,21 +253,21 @@
             display: none; 
             flex-wrap: wrap; 
             gap: 15px;
-            justify-content: center; /* Centraliza os checkboxes */
+            justify-content: center;
         }
         .company-filters h3 { 
             width: 100%; 
             margin-bottom: 10px; 
             color: #333; 
-            text-align: center; /* Centraliza o título */
+            text-align: center;
         }
         .company-filters label { 
             display: flex; 
             align-items: center; 
             gap: 8px; 
             cursor: pointer; 
-            margin: 0 10px; /* Espaçamento lateral entre os checkboxes */
-            white-space: nowrap; /* Impede quebra de linha nos labels */
+            margin: 0 10px;
+            white-space: nowrap;
         }
         .company-filters input[type="checkbox"] { width: 18px; height: 18px; }
         
@@ -276,8 +283,10 @@
             .autocomplete-dropdown { left: 20px; right: 20px; }
             .crud-form { grid-template-columns: 1fr; }
             .crud-content { width: 95%; margin: 20px auto; padding: 20px; }
-            .crud-table { font-size: 12px; } /* Reduz fonte em telas pequenas */
-            .crud-table th, .crud-table td { padding: 8px 4px; } /* Reduz padding em telas pequenas */
+            .crud-table { font-size: 12px; }
+            .crud-table th, .crud-table td { padding: 8px 4px; }
+            .action-buttons { flex-direction: column; gap: 3px; }
+            .btn-edit, .btn-delete { width: 100%; font-size: 10px; padding: 4px 8px; }
         }
     </style>
 </head>
@@ -307,7 +316,7 @@
                 <button class="btn-primary" id="searchButton">Pesquisar</button>
                 <button class="btn-secondary" id="clearButton">Limpar</button>
                 <button class="btn-select-all" id="selectAllButton">Selecionar Todos</button>
-                <button class="crud-btn" id="crudButton">Gerenciar Registros (CRUD)</button>
+                <button class="btn-crud" id="crudButton">Gerenciar Registros (CRUD)</button>
             </div>
         </div>
 
@@ -336,10 +345,9 @@
             </div>
         </div>
 
-        <!-- Novo Filtro por Empresa Emissora - OTIMIZADO -->
+        <!-- Filtro por Empresa Emissora -->
         <div class="company-filters" id="companyFilters">
             <h3>Filtrar por Empresa Emissora:</h3>
-            <!-- As checkboxes serão geradas dinamicamente via JavaScript -->
         </div>
 
         <div class="filters">
@@ -376,7 +384,7 @@
         <div class="pdf-preview" id="pdfPreview"></div>
     </div>
 
-    <!-- Modal CRUD - AMPLIADO -->
+    <!-- Modal CRUD -->
     <div id="crudModal" class="crud-modal">
         <div class="crud-content">
             <div class="crud-header">
@@ -411,7 +419,7 @@
                     
                     <div class="form-group">
                         <label for="crudValor">Valor *</label>
-                        <input type="number" id="crudValor" step="0.01" min="0" required>
+                        <input type="text" id="crudValor" required placeholder="R$ 0,00">
                     </div>
                     
                     <div class="form-group">
@@ -445,7 +453,6 @@
                         </tr>
                     </thead>
                     <tbody id="crudTableBody">
-                        <!-- Os registros serão inseridos aqui via JavaScript -->
                     </tbody>
                 </table>
             </div>
@@ -467,19 +474,42 @@
         let clients = {};
         let allClientNames = [];
         let selectedClients = new Set();
-        let selectedCompanies = new Set(); // Novo: empresas selecionadas
-        let allCompanyNames = []; // Novo: lista de todas as empresas
-        const currentDate = new Date(); // usa data atual
+        let selectedCompanies = new Set();
+        let allCompanyNames = [];
+        const currentDate = new Date();
         const serialOffset = 25569;
         let dateFilterActive = false;
         let startDateFilter = null;
         let endDateFilter = null;
         
-        // Variáveis para o CRUD
         let editingRecordId = null;
         let allRecords = [];
 
-        // Inicialização
+        // Função para formatar valor em Real Brasileiro
+        function formatCurrency(value) {
+            if (isNaN(value) || value === null) return 'R$ 0,00';
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        }
+
+        // Função para converter string de moeda para número
+        function parseCurrency(value) {
+            if (typeof value === 'number') return value;
+            if (typeof value !== 'string') return 0;
+            
+            // Remove R$, pontos, espaços e converte vírgula para ponto
+            const cleanValue = value.replace(/[^\d,]/g, '').replace(/\./g, '').replace(',', '.');
+            return parseFloat(cleanValue) || 0;
+        }
+
+        // Função para formatar input de moeda em tempo real
+        function formatCurrencyInput(input) {
+            let value = input.value.replace(/\D/g, '');
+            value = (value / 100).toFixed(2) + '';
+            value = value.replace('.', ',');
+            value = value.replace(/(\d)(?=(\d{3})+,)/g, '$1.');
+            input.value = 'R$ ' + value;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             // Configurar event listeners
             document.getElementById('fileInput').addEventListener('change', importFile);
@@ -505,6 +535,11 @@
             document.getElementById('crudForm').addEventListener('submit', saveRecord);
             document.getElementById('searchCrud').addEventListener('keyup', filterCrudTable);
             
+            // Formatação automática do campo valor
+            document.getElementById('crudValor').addEventListener('input', function() {
+                formatCurrencyInput(this);
+            });
+            
             // Fechar modal ao clicar fora dele
             document.getElementById('crudModal').addEventListener('click', function(e) {
                 if (e.target === this) closeCrudModal();
@@ -516,43 +551,28 @@
             updateCrudTable();
         });
 
-        // Converte serial do Excel pra Date ou aceita strings ISO ou dd/mm/yyyy - CORRIGIDO
         function serialToDate(serial) {
             if (serial === null || serial === undefined || serial === '') return null;
-            // Se já for Date
             if (serial instanceof Date) return serial;
-            // Se for número (Excel serial) - CORREÇÃO AQUI
+            
             if (!isNaN(serial) && serial !== '' && typeof serial !== 'string') {
-                // Correção: Excel usa base 1 de janeiro de 1900, JavaScript usa base 1 de janeiro de 1970
-                // A fórmula correta é: (serial - 25569) * 86400 * 1000
                 const utcDays = Math.floor(serial - serialOffset);
                 const utcValue = utcDays * 86400 * 1000;
                 const date = new Date(utcValue);
-                
-                // Ajustar para fuso horário local
                 const timezoneOffset = date.getTimezoneOffset() * 60000;
                 return new Date(utcValue + timezoneOffset);
             }
-            // Se for string contendo formato ISO ou com espaço
+            
             if (typeof serial === 'string') {
                 const s = serial.trim();
-                // Tentar conversão direta
                 const d1 = new Date(s);
                 if (!isNaN(d1)) return d1;
-                // Tentar DD/MM/YYYY (com ou sem hora)
+                
                 const dateOnlyMatch = s.match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
                 if (dateOnlyMatch) {
                     const day = parseInt(dateOnlyMatch[1], 10);
                     const month = parseInt(dateOnlyMatch[2], 10) - 1;
                     const year = parseInt(dateOnlyMatch[3], 10);
-                    return new Date(year, month, day);
-                }
-                // Tentar YYYY-MM-DD (formato ISO)
-                const isoMatch = s.match(/(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/);
-                if (isoMatch) {
-                    const year = parseInt(isoMatch[1], 10);
-                    const month = parseInt(isoMatch[2], 10) - 1;
-                    const day = parseInt(isoMatch[3], 10);
                     return new Date(year, month, day);
                 }
             }
@@ -596,29 +616,20 @@
             reader.readAsBinaryString(file);
         }
 
-        // Função robusta para converter campo VALOR em número
         function parseCurrencyToNumber(val) {
             if (val === null || val === undefined || val === '') return 0;
-            // Se já for número
             if (typeof val === 'number') return val;
-            // Se for string, limpar e converter
+            
             let s = String(val).trim();
-            // Remover parênteses (indicando negativo) e marcar sinal
             let negative = false;
             if (/^\(.*\)$/.test(s)) {
                 negative = true;
                 s = s.replace(/^\(|\)$/g, '');
             }
-            // Remover "R$", espaços e letras
+            
             s = s.replace(/[R$\sA-Za-z]/g, '');
-            // Remover pontos de milhar, substituir vírgula decimal por ponto
-            // Caso a string tenha mais de um separador de vírgula/ponto, removemos pontos (milhares)
-            // e mantemos a última vírgula como decimal (convertendo para ponto).
-            // Simples abordagem:
-            // - substituir vírgulas por marcador temporário
-            s = s.replace(/\./g, ''); // remove pontos de milhar
-            s = s.replace(/,/g, '.'); // vírgulas -> ponto decimal
-            // remover qualquer caractere não numérico/.- restante
+            s = s.replace(/\./g, '');
+            s = s.replace(/,/g, '.');
             s = s.replace(/[^0-9\.\-]/g, '');
             const n = parseFloat(s);
             if (isNaN(n)) return 0;
@@ -628,7 +639,7 @@
         function processData() {
             clients = {};
             allClientNames = [];
-            allCompanyNames = []; // Novo: resetar lista de empresas
+            allCompanyNames = [];
             allRecords = [];
             let loadedCount = 0;
             if (!Array.isArray(data) || data.length === 0) return;
@@ -647,7 +658,6 @@
                 const liq = row[4] || '';
                 const emissora = row[5] ? String(row[5]).trim() : '';
 
-                // se valor zero ou NaN, ignorar registro
                 if (isNaN(valor) || valor === 0) continue;
 
                 if (!clients[cliente]) {
@@ -668,7 +678,6 @@
                 clients[cliente].titles.push(record);
                 allRecords.push(record);
                 
-                // Novo: adicionar empresa à lista se não existir
                 if (emissora && !allCompanyNames.includes(emissora)) {
                     allCompanyNames.push(emissora);
                 }
@@ -677,14 +686,11 @@
             }
 
             allClientNames.sort((a,b) => a.localeCompare(b));
-            allCompanyNames.sort((a,b) => a.localeCompare(b)); // Novo: ordenar empresas
+            allCompanyNames.sort((a,b) => a.localeCompare(b));
             document.getElementById('recordsLoaded').textContent = loadedCount;
-            
-            // Novo: atualizar filtro de empresas
             updateCompanyFilters();
         }
 
-        // Novo: função para atualizar os filtros de empresa
         function updateCompanyFilters() {
             const companyFilters = document.getElementById('companyFilters');
             let html = '<h3>Filtrar por Empresa Emissora:</h3>';
@@ -696,7 +702,6 @@
             
             companyFilters.innerHTML = html;
             
-            // Adicionar event listeners aos checkboxes de empresa
             document.querySelectorAll('input[name="company"]').forEach(cb => {
                 cb.addEventListener('change', function() {
                     if (this.checked) {
@@ -709,14 +714,12 @@
             });
         }
 
-        // Novo: função para mostrar/ocultar filtro de empresas
         function toggleCompanyFilter() {
             const showCompanyFilter = document.getElementById('showCompanyFilter').checked;
             const companyFilters = document.getElementById('companyFilters');
             
             if (showCompanyFilter) {
                 companyFilters.style.display = 'flex';
-                // Selecionar todas as empresas por padrão
                 selectedCompanies = new Set(allCompanyNames);
                 updateCompanyFilters();
             } else {
@@ -738,14 +741,11 @@
                 const liqDate = serialToDate(title.liq);
                 const isPaid = title.liq && liqDate;
                 
-                // Se o título está quitado
                 if (isPaid) {
                     if (showPaid) {
                         paid += Number(title.valor || 0);
                     }
-                } 
-                // Se o título está em aberto
-                else {
+                } else {
                     if (dueDate) {
                         if (dueDate <= currentDate) {
                             if (onlyOverdue) {
@@ -757,7 +757,6 @@
                             }
                         }
                     } else {
-                        // Se não tem data de vencimento, considerar como vencido
                         if (onlyOverdue) {
                             overdue += Number(title.valor || 0);
                         }
@@ -768,7 +767,6 @@
             return { overdue, future, paid, general: overdue + future + paid };
         }
 
-        // Nova função para calcular totais por empresa
         function calculateTotalsByCompany(titles) {
             const companies = {};
             
@@ -785,14 +783,11 @@
                 const showFuture = document.getElementById('showFuture').checked;
                 const showPaid = document.getElementById('showPaid').checked;
                 
-                // Se o título está quitado
                 if (isPaid) {
                     if (showPaid) {
                         companies[company].paid += Number(title.valor || 0);
                     }
-                } 
-                // Se o título está em aberto
-                else {
+                } else {
                     if (dueDate) {
                         if (dueDate <= currentDate) {
                             if (onlyOverdue) {
@@ -804,14 +799,12 @@
                             }
                         }
                     } else {
-                        // Se não tem data de vencimento, considerar como vencido
                         if (onlyOverdue) {
                             companies[company].overdue += Number(title.valor || 0);
                         }
                     }
                 }
                 
-                // Atualizar total geral da empresa
                 companies[company].general = companies[company].overdue + companies[company].future + companies[company].paid;
             });
             
@@ -863,34 +856,37 @@
             showClientCheckboxes();
         }
 
+        // CORREÇÃO: Função para mostrar checkboxes dos clientes - MELHORADA
         function showClientCheckboxes() {
             const query = document.getElementById('searchInput').value.trim();
             
-            // Mostrar container do checkbox "Selecionar Todos"
             document.getElementById('selectAllContainer').style.display = 'block';
             
+            let matches;
+            
             if (!query) {
-                document.getElementById('clientCheckboxes').style.display = 'none';
-                document.getElementById('dateFilters').style.display = 'none';
-                return;
+                // Se não há busca, mostrar todos os clientes
+                matches = allClientNames.map(name => ({ name, score: 1 }));
+            } else {
+                // Se há busca, mostrar apenas os clientes correspondentes
+                matches = allClientNames
+                    .map(name => ({ name, score: fuzzyMatch(query, name) }))
+                    .filter(match => match.score > 0)
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 10);
             }
-
-            const matches = allClientNames
-                .map(name => ({ name, score: fuzzyMatch(query, name) }))
-                .filter(match => match.score > 0)
-                .sort((a, b) => b.score - a.score)
-                .slice(0, 10);
 
             let html = '<h3>Selecione os Clientes:</h3>';
             matches.forEach(match => {
                 const isChecked = selectedClients.has(match.name) ? 'checked' : '';
                 html += `<label><input type="checkbox" name="client" value="${match.name}" ${isChecked}> ${match.name}</label>`;
             });
+            
             document.getElementById('clientCheckboxes').innerHTML = html;
             document.getElementById('clientCheckboxes').style.display = 'block';
             document.getElementById('dateFilters').style.display = 'block';
             
-            // Adicionar event listeners aos checkboxes
+            // CORREÇÃO: Re-adicionar event listeners aos checkboxes
             document.querySelectorAll('input[name="client"]').forEach(cb => {
                 cb.addEventListener('change', function() {
                     if (this.checked) {
@@ -903,7 +899,6 @@
                 });
             });
             
-            // Atualizar o estado do checkbox "Selecionar Todos"
             updateSelectAllCheckbox();
         }
 
@@ -963,10 +958,8 @@
                 return;
             }
             
-            // CORREÇÃO: Usar a data exata selecionada, sem ajustes de fuso horário
             if (startDateInput) {
                 startDateFilter = new Date(startDateInput);
-                // Manter a data exata sem ajustes de hora
                 startDateFilter.setHours(0, 0, 0, 0);
             } else {
                 startDateFilter = null;
@@ -974,7 +967,6 @@
             
             if (endDateInput) {
                 endDateFilter = new Date(endDateInput);
-                // Incluir todo o dia final (até 23:59:59.999)
                 endDateFilter.setHours(23, 59, 59, 999);
             } else {
                 endDateFilter = null;
@@ -993,39 +985,26 @@
             updateResults();
         }
 
-        // NOVO: Função para limpar todos os filtros
         function clearAllFilters() {
-            // Limpar busca
             document.getElementById('searchInput').value = '';
             document.getElementById('autocompleteDropdown').style.display = 'none';
-            
-            // Limpar seleção de clientes
             document.getElementById('clientCheckboxes').style.display = 'none';
             document.getElementById('selectAllContainer').style.display = 'none';
             selectedClients.clear();
-            
-            // Limpar filtro de data
             clearDateFilter();
-            
-            // Limpar filtro de empresas
             document.getElementById('showCompanyFilter').checked = false;
             document.getElementById('companyFilters').style.display = 'none';
             selectedCompanies.clear();
-            
-            // Limpar visualização do PDF
             document.getElementById('pdfPreview').style.display = 'none';
             document.getElementById('pdfPreview').innerHTML = '';
-            
-            // Atualizar resultados
             updateResults();
         }
 
         function isDateInRange(date, start, end) {
             if (!date) return false;
             
-            // CORREÇÃO: Comparar datas sem ajustes de fuso horário
             const dateOnly = new Date(date);
-            dateOnly.setHours(12, 0, 0, 0); // Definir meio-dia para evitar problemas de fuso horário
+            dateOnly.setHours(12, 0, 0, 0);
             
             if (start && end) {
                 const startCopy = new Date(start);
@@ -1052,7 +1031,6 @@
             const showPaid = document.getElementById('showPaid').checked;
             const selected = getSelectedClients();
             
-            // CORREÇÃO: Não mostrar resultados se nenhum filtro está selecionado
             if (!onlyOverdue && !showFuture && !showPaid) {
                 document.getElementById('results').innerHTML = '<div class="no-results">Nenhum resultado encontrado<br>Selecione pelo menos um filtro para visualizar os títulos.</div>';
                 document.getElementById('summary').style.display = 'none';
@@ -1062,13 +1040,11 @@
             
             let filteredClients = {};
             
-            // Se não há clientes selecionados, mostrar todos
             if (selected.size === 0) {
                 for (let client in clients) {
                     filteredClients[client] = { ...clients[client] };
                 }
             } else {
-                // Filtrar pelos clientes selecionados
                 for (let client of selected) {
                     if (clients[client]) {
                         filteredClients[client] = { ...clients[client] };
@@ -1076,7 +1052,6 @@
                 }
             }
             
-            // Aplicar filtros de data, status e empresa aos títulos de cada cliente
             for (let client in filteredClients) {
                 const clientTitles = filteredClients[client].titles;
                 const filteredTitles = clientTitles.filter(title => {
@@ -1084,7 +1059,6 @@
                     const liqDate = serialToDate(title.liq);
                     const isPaid = title.liq && liqDate;
                     
-                    // Filtro por data
                     if (dateFilterActive) {
                         const titleDate = isPaid ? liqDate : dueDate;
                         if (!isDateInRange(titleDate, startDateFilter, endDateFilter)) {
@@ -1092,7 +1066,6 @@
                         }
                     }
                     
-                    // Novo: Filtro por empresa
                     if (selectedCompanies.size > 0) {
                         const company = title.emissora || 'Não informada';
                         if (!selectedCompanies.has(company)) {
@@ -1100,7 +1073,6 @@
                         }
                     }
                     
-                    // Filtro por status
                     if (isPaid) {
                         return showPaid;
                     } else {
@@ -1111,7 +1083,6 @@
                                 return showFuture;
                             }
                         } else {
-                            // Se não tem data de vencimento, considerar como vencido
                             return onlyOverdue;
                         }
                     }
@@ -1121,7 +1092,6 @@
                 filteredClients[client].totals = calculateTotalByCategory(filteredTitles);
             }
             
-            // Remover clientes sem títulos após filtragem
             for (let client in filteredClients) {
                 if (filteredClients[client].titles.length === 0) {
                     delete filteredClients[client];
@@ -1143,10 +1113,8 @@
                 return;
             }
             
-            // Calcular totais globais
             const globalTotals = calculateGlobalTotals(filteredClients);
             
-            // Atualizar resumo
             document.getElementById('totalOverdue').textContent = formatCurrency(globalTotals.overdue);
             document.getElementById('totalFuture').textContent = formatCurrency(globalTotals.future);
             document.getElementById('totalPaid').textContent = formatCurrency(globalTotals.paid);
@@ -1154,7 +1122,6 @@
             document.getElementById('clientsCount').textContent = clientsCount;
             document.getElementById('summary').style.display = 'block';
             
-            // Gerar HTML dos cards de clientes
             let html = '<div class="client-cards">';
             let colorIndex = 0;
             const gradients = [
@@ -1170,7 +1137,6 @@
                 const totals = clientData.totals;
                 const gradient = gradients[colorIndex % gradients.length];
                 
-                // Calcular totais por empresa para este cliente
                 const companyTotals = calculateTotalsByCompany(clientData.titles);
                 
                 html += `<div class="client-card">
@@ -1198,7 +1164,7 @@
                     })
                     .forEach(title => {
                         const dueStr = serialToDate(title.venc) ? serialToDate(title.venc).toLocaleDateString('pt-BR') : 'N/A';
-                        const valorStr = Number(title.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        const valorStr = formatCurrency(title.valor);
                         const isOpen = isTitleOpen(title);
                         const status = isOpen ? 'Aberto' : 'Quitado';
                         const className = isOpen ? '' : 'paid-title';
@@ -1217,7 +1183,6 @@
                         <h4>Resumo por Empresa Emissora:</h4>
                         <div class="company-totals">`;
                 
-                // Adicionar resumo por empresa
                 for (let company in companyTotals) {
                     const companyTotal = companyTotals[company];
                     if (companyTotal.general > 0) {
@@ -1234,10 +1199,10 @@
                 html += `</div>
                     </div>
                     <div class="client-totals">
-                        <div class="total-card total-overdue">Vencidos: ${totals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
-                        <div class="total-card total-future">A Vencer: ${totals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
-                        <div class="total-card total-paid">Quitados: ${totals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
-                        <div class="total-card total-general">Total: ${totals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+                        <div class="total-card total-overdue">Vencidos: ${formatCurrency(totals.overdue)}</div>
+                        <div class="total-card total-future">A Vencer: ${formatCurrency(totals.future)}</div>
+                        <div class="total-card total-paid">Quitados: ${formatCurrency(totals.paid)}</div>
+                        <div class="total-card total-general">Total: ${formatCurrency(totals.general)}</div>
                     </div>
                 </div>`;
                 
@@ -1248,25 +1213,21 @@
             resultsDiv.innerHTML = html;
         }
 
-        function formatCurrency(value) {
-            if (isNaN(value) || value === null) return 'R$ 0,00';
-            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-        }
-
         function performSearch() {
             showClientCheckboxes();
             updateResults();
         }
 
         function clearSearch() {
-            clearAllFilters(); // Agora limpa todos os filtros
+            clearAllFilters();
         }
 
+        // CORREÇÃO: Função selectAllFromSearch - MELHORADA
         function selectAllFromSearch() {
             const query = document.getElementById('searchInput').value.trim();
             
             if (query) {
-                // Selecionar apenas os clientes correspondentes à busca
+                // Se há uma busca, selecionar apenas os clientes correspondentes
                 const matches = allClientNames
                     .map(name => ({ name, score: fuzzyMatch(query, name) }))
                     .filter(match => match.score > 0)
@@ -1275,12 +1236,14 @@
                 
                 if (matches.length > 0) {
                     matches.forEach(match => selectedClients.add(match.name));
-                    showClientCheckboxes();
+                    showClientCheckboxes(); // CORREÇÃO: Chamar showClientCheckboxes para mostrar os checkboxes
                     updateResults();
                 }
             } else {
-                // Se não houver busca, selecionar todos os clientes
-                selectAllClients();
+                // Se não há busca, selecionar todos os clientes
+                selectedClients = new Set(allClientNames);
+                showClientCheckboxes(); // CORREÇÃO: Chamar showClientCheckboxes para mostrar os checkboxes
+                updateResults();
             }
         }
 
@@ -1310,7 +1273,7 @@
             document.getElementById('crudCliente').value = '';
             document.getElementById('crudVencimento').value = '';
             document.getElementById('crudDescricao').value = '';
-            document.getElementById('crudValor').value = '';
+            document.getElementById('crudValor').value = 'R$ 0,00';
             document.getElementById('crudLiquidacao').value = '';
             document.getElementById('crudEmpresa').value = '';
             editingRecordId = null;
@@ -1328,7 +1291,7 @@
             const cliente = document.getElementById('crudCliente').value.trim();
             const vencimento = document.getElementById('crudVencimento').value;
             const descricao = document.getElementById('crudDescricao').value.trim();
-            const valor = parseFloat(document.getElementById('crudValor').value);
+            const valor = parseCurrency(document.getElementById('crudValor').value);
             const liquidacao = document.getElementById('crudLiquidacao').value;
             const empresa = document.getElementById('crudEmpresa').value.trim();
             
@@ -1338,7 +1301,6 @@
             }
             
             if (editingRecordId !== null) {
-                // Atualizar registro existente
                 const recordIndex = allRecords.findIndex(r => r.id === editingRecordId);
                 if (recordIndex !== -1) {
                     allRecords[recordIndex] = {
@@ -1352,7 +1314,6 @@
                     };
                 }
             } else {
-                // Adicionar novo registro
                 const newId = allRecords.length > 0 ? Math.max(...allRecords.map(r => r.id)) + 1 : 1;
                 allRecords.push({
                     id: newId,
@@ -1365,15 +1326,9 @@
                 });
             }
             
-            // Atualizar a estrutura de dados principal
             updateDataFromRecords();
-            
-            // Atualizar a tabela CRUD
             updateCrudTable();
-            
-            // Fechar o formulário
             cancelForm();
-            
             alert('Registro salvo com sucesso!');
         }
 
@@ -1386,726 +1341,4 @@
             document.getElementById('crudTableContainer').style.display = 'none';
             
             document.getElementById('recordId').value = record.id;
-            document.getElementById('crudCliente').value = record.cliente;
-            document.getElementById('crudVencimento').value = record.venc.split(' ')[0]; // Remove hora se houver
-            document.getElementById('crudDescricao').value = record.desc;
-            document.getElementById('crudValor').value = record.valor;
-            document.getElementById('crudLiquidacao').value = record.liq ? record.liq.split(' ')[0] : '';
-            document.getElementById('crudEmpresa').value = record.emissora || '';
             
-            editingRecordId = id;
-        }
-
-        function deleteRecord(id) {
-            if (!confirm('Tem certeza que deseja excluir este registro?')) return;
-            
-            allRecords = allRecords.filter(r => r.id !== id);
-            updateDataFromRecords();
-            updateCrudTable();
-            
-            alert('Registro excluído com sucesso!');
-        }
-
-        function updateDataFromRecords() {
-            // Reconstruir a estrutura de dados a partir dos registros
-            clients = {};
-            allClientNames = [];
-            allCompanyNames = [];
-            
-            allRecords.forEach(record => {
-                if (!clients[record.cliente]) {
-                    clients[record.cliente] = { titles: [] };
-                    allClientNames.push(record.cliente);
-                }
-                
-                clients[record.cliente].titles.push(record);
-                
-                // Atualizar lista de empresas
-                if (record.emissora && !allCompanyNames.includes(record.emissora)) {
-                    allCompanyNames.push(record.emissora);
-                }
-            });
-            
-            allClientNames.sort((a,b) => a.localeCompare(b));
-            allCompanyNames.sort((a,b) => a.localeCompare(b));
-            document.getElementById('recordsLoaded').textContent = allRecords.length;
-            
-            // Atualizar filtro de empresas
-            updateCompanyFilters();
-            
-            // Atualizar os resultados exibidos
-            updateResults();
-        }
-
-        function updateCrudTable() {
-            const tableBody = document.getElementById('crudTableBody');
-            const searchTerm = document.getElementById('searchCrud').value.toLowerCase();
-            
-            let filteredRecords = allRecords;
-            
-            if (searchTerm) {
-                filteredRecords = allRecords.filter(record => 
-                    record.cliente.toLowerCase().includes(searchTerm) ||
-                    record.desc.toLowerCase().includes(searchTerm) ||
-                    (record.emissora && record.emissora.toLowerCase().includes(searchTerm))
-                );
-            }
-            
-            let html = '';
-            
-            if (filteredRecords.length === 0) {
-                html = '<tr><td colspan="7" style="text-align: center;">Nenhum registro encontrado</td></tr>';
-            } else {
-                filteredRecords.forEach(record => {
-                    const vencimento = serialToDate(record.venc);
-                    const liquidacao = record.liq ? serialToDate(record.liq) : null;
-                    
-                    html += `
-                        <tr>
-                            <td title="${record.cliente}">${record.cliente}</td>
-                            <td>${vencimento ? vencimento.toLocaleDateString('pt-BR') : 'N/A'}</td>
-                            <td title="${record.desc}">${record.desc}</td>
-                            <td>${formatCurrency(record.valor)}</td>
-                            <td>${liquidacao ? liquidacao.toLocaleDateString('pt-BR') : (record.liq ? record.liq : 'Em aberto')}</td>
-                            <td title="${record.emissora || 'Não informada'}">${record.emissora || 'Não informada'}</td>
-                            <td class="action-buttons">
-                                <button class="btn-edit" onclick="editRecord(${record.id})">Editar</button>
-                                <button class="btn-delete" onclick="deleteRecord(${record.id})">Excluir</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-            }
-            
-            tableBody.innerHTML = html;
-        }
-
-        function filterCrudTable() {
-            updateCrudTable();
-        }
-
-        // ========== FUNÇÃO PREVIEW PDF (RESTAURADA) ==========
-        function previewPDF() {
-            // CORREÇÃO: Verificar se há pelo menos um filtro selecionado
-            const onlyOverdue = document.getElementById('onlyOverdue').checked;
-            const showFuture = document.getElementById('showFuture').checked;
-            const showPaid = document.getElementById('showPaid').checked;
-            
-            if (!onlyOverdue && !showFuture && !showPaid) {
-                alert('Selecione pelo menos um filtro para gerar o PDF.');
-                return;
-            }
-            
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-            const query = document.getElementById('searchInput').value.trim();
-            let yPos = 20;
-            let globalTotals = { overdue: 0, future: 0, paid: 0, general: 0 };
-            const selected = getSelectedClients();
-
-            // Configurações iniciais
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(22);
-            doc.setTextColor(255, 255, 255);
-            doc.setFillColor(102, 126, 234);
-            doc.rect(0, 0, 210, 25, 'F');
-            doc.text('Relatório de Títulos em Aberto', 105, 18, { align: 'center' });
-            yPos = 35;
-
-            doc.setFont('helvetica', 'normal');
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            doc.text(`Data da Consulta: ${currentDate.toLocaleDateString('pt-BR')}`, 20, yPos);
-            yPos += 7;
-            
-            // Informar filtros aplicados
-            let filtersText = 'Filtros: ';
-            if (onlyOverdue) filtersText += 'Vencidos ';
-            if (showFuture) filtersText += 'A Vencer ';
-            if (showPaid) filtersText += 'Quitados ';
-            doc.text(filtersText, 20, yPos);
-            yPos += 7;
-            
-            if (query) {
-                doc.text(`Busca: ${query}`, 20, yPos);
-                yPos += 7;
-            }
-            
-            // Novo: Informar empresas selecionadas no PDF
-            if (selectedCompanies.size > 0) {
-                let companiesText = 'Empresas: ';
-                const companiesArray = Array.from(selectedCompanies);
-                if (companiesArray.length <= 3) {
-                    companiesText += companiesArray.join(', ');
-                } else {
-                    companiesText += `${companiesArray.length} empresas selecionadas`;
-                }
-                doc.text(companiesText, 20, yPos);
-                yPos += 7;
-            }
-            
-            if (dateFilterActive) {
-                let dateText = 'Período: ';
-                if (startDateFilter) {
-                    const startDate = new Date(startDateFilter);
-                    startDate.setHours(0, 0, 0, 0);
-                    dateText += `De ${startDate.toLocaleDateString('pt-BR')} `;
-                }
-                if (endDateFilter) {
-                    const endDate = new Date(endDateFilter);
-                    endDate.setHours(0, 0, 0, 0);
-                    dateText += `Até ${endDate.toLocaleDateString('pt-BR')}`;
-                }
-                doc.text(dateText, 20, yPos);
-                yPos += 7;
-            }
-            
-            yPos += 5;
-
-            let clientIndex = 0;
-            const colors = [[255, 236, 210], [252, 182, 159], [168, 237, 234], [254, 214, 227], [210, 153, 194]];
-
-            // Adicionar página de resumo inicial
-            if (yPos > 200) {
-                doc.addPage();
-                yPos = 20;
-            }
-            
-            // Título do resumo
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(16);
-            doc.setTextColor(52, 73, 94);
-            doc.text('RESUMO GERAL', 105, yPos, { align: 'center' });
-            yPos += 15;
-
-            // Calcular totais globais primeiro
-            for (let client of selected) {
-                if (!clients[client]) continue;
-
-                let clientTitles = clients[client].titles.filter(title => {
-                    const dueDate = serialToDate(title.venc);
-                    const liqDate = serialToDate(title.liq);
-                    const isPaid = title.liq && liqDate;
-                    
-                    // Se o título está quitado
-                    if (isPaid) {
-                        return showPaid;
-                    } 
-                    // Se o título está em aberto
-                    else {
-                        if (dueDate) {
-                            if (dueDate <= currentDate) {
-                                return onlyOverdue;
-                            } else {
-                                return showFuture;
-                            }
-                        } else {
-                            // Se não tem data de vencimento, considerar como vencido
-                            return onlyOverdue;
-                        }
-                    }
-                });
-
-                // Aplicar filtro de data
-                if (dateFilterActive) {
-                    clientTitles = clientTitles.filter(title => {
-                        const dueDate = serialToDate(title.venc);
-                        const liqDate = serialToDate(title.liq);
-                        const isPaid = title.liq && liqDate;
-                        const titleDate = isPaid ? liqDate : dueDate;
-                        return isDateInRange(titleDate, startDateFilter, endDateFilter);
-                    });
-                }
-
-                // Novo: Aplicar filtro de empresa
-                if (selectedCompanies.size > 0) {
-                    clientTitles = clientTitles.filter(title => {
-                        const company = title.emissora || 'Não informada';
-                        return selectedCompanies.has(company);
-                    });
-                }
-
-                let displayTitles = clientTitles;
-
-                if (displayTitles.length === 0) continue;
-
-                const totals = calculateTotalByCategory(displayTitles);
-
-                globalTotals.overdue += totals.overdue;
-                globalTotals.future += totals.future;
-                globalTotals.paid += totals.paid;
-                globalTotals.general += totals.general;
-            }
-
-            // Exibir resumo geral
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(12);
-            doc.setTextColor(0, 0, 0);
-            
-            if (globalTotals.overdue > 0) {
-                doc.setTextColor(198, 40, 40);
-                doc.text(`Total Vencidos: ${globalTotals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
-                yPos += 8;
-            }
-            
-            if (globalTotals.future > 0) {
-                doc.setTextColor(39, 174, 96);
-                doc.text(`Total A Vencer: ${globalTotals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
-                yPos += 8;
-            }
-            
-            if (globalTotals.paid > 0) {
-                doc.setTextColor(108, 117, 125);
-                doc.text(`Total Quitados: ${globalTotals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
-                yPos += 8;
-            }
-            
-            doc.setTextColor(0, 0, 0);
-            doc.text(`Total Geral: ${globalTotals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
-            yPos += 15;
-            
-            doc.setTextColor(52, 73, 94);
-            doc.text(`Clientes no Relatório: ${selected.size}`, 20, yPos);
-            yPos += 20;
-
-            // Adicionar detalhamento por cliente
-            for (let client of selected) {
-                if (!clients[client]) continue;
-
-                let clientTitles = clients[client].titles.filter(title => {
-                    const dueDate = serialToDate(title.venc);
-                    const liqDate = serialToDate(title.liq);
-                    const isPaid = title.liq && liqDate;
-                    
-                    // Se o título está quitado
-                    if (isPaid) {
-                        return showPaid;
-                    } 
-                    // Se o título está em aberto
-                    else {
-                        if (dueDate) {
-                            if (dueDate <= currentDate) {
-                                return onlyOverdue;
-                            } else {
-                                return showFuture;
-                            }
-                        } else {
-                            // Se não tem data de vencimento, considerar como vencido
-                            return onlyOverdue;
-                        }
-                    }
-                });
-
-                // Aplicar filtro de data
-                if (dateFilterActive) {
-                    clientTitles = clientTitles.filter(title => {
-                        const dueDate = serialToDate(title.venc);
-                        const liqDate = serialToDate(title.liq);
-                        const isPaid = title.liq && liqDate;
-                        const titleDate = isPaid ? liqDate : dueDate;
-                        return isDateInRange(titleDate, startDateFilter, endDateFilter);
-                    });
-                }
-
-                // Novo: Aplicar filtro de empresa
-                if (selectedCompanies.size > 0) {
-                    clientTitles = clientTitles.filter(title => {
-                        const company = title.emissora || 'Não informada';
-                        return selectedCompanies.has(company);
-                    });
-                }
-
-                let displayTitles = clientTitles;
-
-                if (displayTitles.length === 0) continue;
-
-                const totals = calculateTotalByCategory(displayTitles);
-                const companyTotals = calculateTotalsByCompany(displayTitles);
-
-                if (yPos > 250) {
-                    doc.addPage();
-                    yPos = 20;
-                }
-
-                const color = colors[clientIndex % colors.length];
-                const maxClientNameLength = 30;
-                const clientName = client.length > maxClientNameLength ? client.substring(0, maxClientNameLength) + '...' : client;
-                
-                // Cabeçalho do cliente
-                doc.setFillColor(color[0], color[1], color[2]);
-                doc.roundedRect(15, yPos, 180, 10, 3, 3, 'F');
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(14);
-                doc.setTextColor(52, 73, 94);
-                doc.text(clientName, 20, yPos + 7);
-                yPos += 15;
-
-                // Títulos em tabela
-                if (displayTitles.length > 0) {
-                    // Cabeçalho da tabela
-                    doc.setFillColor(240, 240, 240);
-                    doc.rect(20, yPos, 170, 8, 'F');
-                    doc.setFontSize(10);
-                    doc.setTextColor(85, 85, 85);
-                    
-                    // Cabeçalhos das colunas (adicionado Empresa)
-                    // Colunas dentro da largura 170 (começando em x=20)
-                    // layout: Descrição (55mm), Empresa (45mm), Vencimento (30mm), Valor (25mm), Status (15mm)
-                    const col = { x: 22, descW: 55, empresaX: 22 + 55 + 0.5, empresaW: 45, vencX: 22 + 55 + 45 + 3.5, valorX: 22 + 55 + 45 + 30 + 6, statusX: 22 + 55 + 45 + 30 + 25 + 9 };
-                    doc.text('Descrição', col.x, yPos + 5);
-                    doc.text('Empresa', col.empresaX, yPos + 5);
-                    doc.text('Vencimento', col.vencX, yPos + 5);
-                    doc.text('Valor', col.valorX, yPos + 5);
-                    doc.text('Status', col.statusX, yPos + 5);
-                    
-                    yPos += 10;
-                    
-                    // Linhas da tabela (com quebra automática para descrição e empresa)
-                    displayTitles.sort((a, b) => {
-                        const da = serialToDate(a.venc) || new Date(0);
-                        const db = serialToDate(b.venc) || new Date(0);
-                        return da - db;
-                    }).forEach((title, index) => {
-                        // Se não couber, criar nova página e redesenhar cabeçalho da tabela
-                        if (yPos > 270) {
-                            doc.addPage();
-                            yPos = 20;
-                            // Redesenhar cabeçalho da tabela em nova página
-                            doc.setFillColor(240, 240, 240);
-                            doc.rect(20, yPos, 170, 8, 'F');
-                            doc.setFontSize(10);
-                            doc.setTextColor(85, 85, 85);
-                            doc.text('Descrição', col.x, yPos + 5);
-                            doc.text('Empresa', col.empresaX, yPos + 5);
-                            doc.text('Vencimento', col.vencX, yPos + 5);
-                            doc.text('Valor', col.valorX, yPos + 5);
-                            doc.text('Status', col.statusX, yPos + 5);
-                            yPos += 10;
-                        }
-                        
-                        const dueDate = serialToDate(title.venc);
-                        const dueStr = dueDate ? dueDate.toLocaleDateString('pt-BR') : 'N/A';
-                        const valorStr = Number(title.valor || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                        const status = isTitleOpen(title) ? 'Aberto' : 'Quitado';
-                        
-                        // Quebra automática (wrap) para descrição and emissora
-                        const descLines = doc.splitTextToSize(title.desc || '', col.descW);
-                        const empLines = doc.splitTextToSize(title.emissora || '', col.empresaW);
-                        const maxLines = Math.max(descLines.length, empLines.length, 1);
-                        const lineHeight = 6; // mm por linha
-                        const rowHeight = maxLines * lineHeight;
-                        
-                        // Alternar cores das linhas para melhor legibilidade (mantendo alternância independente do número de linhas)
-                        if (index % 2 === 0) {
-                            doc.setFillColor(248, 249, 250);
-                            doc.rect(20, yPos - 4, 170, rowHeight + 4, 'F');
-                        }
-                        
-                        // Definir cor com base no status (apenas para o texto)
-                        if (!isTitleOpen(title)) {
-                            doc.setTextColor(108, 117, 125); // Cinza para quitados
-                        } else if (dueDate && dueDate <= currentDate) {
-                            doc.setTextColor(198, 40, 40); // Vermelho para vencidos
-                        } else {
-                            doc.setTextColor(39, 174, 96); // Verde para a vencer
-                        }
-                        
-                        // Escrever múltiplas linhas: doc.text aceita array para multiline
-                        doc.setFontSize(9);
-                        doc.text(descLines, col.x, yPos);
-                        doc.text(empLines, col.empresaX, yPos);
-                        doc.text(dueStr, col.vencX, yPos);
-                        doc.text(valorStr, col.valorX, yPos);
-                        doc.text(status, col.statusX, yPos);
-                        
-                        yPos += rowHeight + 4;
-                    });
-                    
-                    yPos += 5;
-                }
-
-                // Resumo por empresa no PDF
-                if (Object.keys(companyTotals).length > 0) {
-                    if (yPos > 240) {
-                        doc.addPage();
-                        yPos = 20;
-                    }
-                    
-                    doc.setFont('helvetica', 'bold');
-                    doc.setFontSize(12);
-                    doc.setTextColor(52, 73, 94);
-                    doc.text('Resumo por Empresa Emissora:', 20, yPos);
-                    yPos += 8;
-                    
-                    for (let company in companyTotals) {
-                        if (yPos > 270) {
-                            doc.addPage();
-                            yPos = 20;
-                        }
-                        
-                        const companyTotal = companyTotals[company];
-                        if (companyTotal.general > 0) {
-                            doc.setFontSize(10);
-                            doc.setTextColor(0, 0, 0);
-                            doc.text(`${company}:`, 25, yPos);
-                            yPos += 5;
-                            
-                            if (companyTotal.overdue > 0) {
-                                doc.setTextColor(198, 40, 40);
-                                doc.text(`  Vencidos: ${formatCurrency(companyTotal.overdue)}`, 25, yPos);
-                                yPos += 5;
-                            }
-                            
-                            if (companyTotal.future > 0) {
-                                doc.setTextColor(39, 174, 96);
-                                doc.text(`  A Vencer: ${formatCurrency(companyTotal.future)}`, 25, yPos);
-                                yPos += 5;
-                            }
-                            
-                            if (companyTotal.paid > 0) {
-                                doc.setTextColor(108, 117, 125);
-                                doc.text(`  Quitados: ${formatCurrency(companyTotal.paid)}`, 25, yPos);
-                                yPos += 5;
-                            }
-                            
-                            doc.setTextColor(0, 0, 0);
-                            doc.setFont('helvetica', 'bold');
-                            doc.text(`  Total: ${formatCurrency(companyTotal.general)}`, 25, yPos);
-                            yPos += 8;
-                        }
-                    }
-                    
-                    yPos += 5;
-                }
-
-                // Resumo do cliente (igual ao original, mas posiciona após a lista)
-                if (yPos > 240) {
-                    doc.addPage();
-                    yPos = 20;
-                }
-                
-                doc.setFont('helvetica', 'bold');
-                doc.setFontSize(11);
-                doc.setTextColor(255, 255, 255);
-                
-                // Vencidos
-                if (totals.overdue > 0) {
-                    doc.setFillColor(231, 76, 60);
-                    doc.roundedRect(15, yPos, 87, 8, 2, 2, 'F');
-                    doc.text(`Vencidos: ${totals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos + 5);
-                }
-                
-                // A vencer
-                if (totals.future > 0) {
-                    doc.setFillColor(39, 174, 96);
-                    doc.roundedRect(15, yPos + 10, 87, 8, 2, 2, 'F');
-                    doc.text(`A Vencer: ${totals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos + 15);
-                }
-                
-                // Quitados
-                if (totals.paid > 0) {
-                    doc.setFillColor(108, 117, 125);
-                    doc.roundedRect(108, yPos, 87, 8, 2, 2, 'F');
-                    doc.text(`Quitados: ${totals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 113, yPos + 5);
-                }
-                
-                // Total geral
-                doc.setFillColor(52, 152, 219);
-                doc.roundedRect(108, yPos + 10, 87, 8, 2, 2, 'F');
-                doc.text(`Total: ${totals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 113, yPos + 15);
-                
-                yPos += 25;
-                clientIndex++;
-            }
-
-            // Adicionar rodapé com totais finais
-            if (yPos > 220) {
-                doc.addPage();
-                yPos = 20;
-            }
-            
-            doc.setFont('helvetica', 'bold');
-            doc.setFontSize(16);
-            doc.setTextColor(52, 73, 94);
-            doc.text('TOTAIS FINAIS', 105, yPos, { align: 'center' });
-            yPos += 15;
-            
-            doc.setFontSize(12);
-            if (globalTotals.overdue > 0) {
-                doc.setTextColor(198, 40, 40);
-                doc.text(`Total Vencidos: ${globalTotals.overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
-                yPos += 8;
-            }
-            
-            if (globalTotals.future > 0) {
-                doc.setTextColor(39, 174, 96);
-                doc.text(`Total A Vencer: ${globalTotals.future.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
-                yPos += 8;
-            }
-            
-            if (globalTotals.paid > 0) {
-                doc.setTextColor(108, 117, 125);
-                doc.text(`Total Quitados: ${globalTotals.paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 20, yPos);
-                yPos += 8;
-            }
-            
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(14);
-            doc.text(`TOTAL GERAL: ${globalTotals.general.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}`, 105, yPos + 10, { align: 'center' });
-
-            const pdfDataUri = doc.output('datauristring');
-            const pdfPreview = document.getElementById('pdfPreview');
-            pdfPreview.style.display = 'block';
-            pdfPreview.innerHTML = `<iframe src="${pdfDataUri}" width="100%" height="600px" style="border: none;"></iframe>
-                                <button class="btn-primary" style="margin-top: 10px;" onclick="downloadPDF('${pdfDataUri}')">Baixar PDF</button>`;
-        }
-
-        function downloadPDF(pdfDataUri) {
-            const link = document.createElement('a');
-            link.href = pdfDataUri;
-            link.download = `relatorio_titulos_aberto_${currentDate.toISOString().split('T')[0]}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            document.getElementById('pdfPreview').style.display = 'none';
-            document.getElementById('pdfPreview').innerHTML = '';
-        }
-
-        function generateXLSX() {
-            // CORREÇÃO: Verificar se há pelo menos um filtro selecionado
-            const onlyOverdue = document.getElementById('onlyOverdue').checked;
-            const showFuture = document.getElementById('showFuture').checked;
-            const showPaid = document.getElementById('showPaid').checked;
-            
-            if (!onlyOverdue && !showFuture && !showPaid) {
-                alert('Selecione pelo menos um filtro para gerar o XLSX.');
-                return;
-            }
-            
-            const wb = XLSX.utils.book_new();
-            const selected = getSelectedClients();
-            let allData = [];
-
-            allData.push(['Cliente', 'Descrição', 'Empresa', 'Vencimento', 'Valor', 'Status']);
-
-            for (let client of selected) {
-                if (!clients[client]) continue;
-
-                let clientTitles = clients[client].titles.filter(title => {
-                    const dueDate = serialToDate(title.venc);
-                    const liqDate = serialToDate(title.liq);
-                    const isPaid = title.liq && liqDate;
-                    
-                    // Se o título está quitado
-                    if (isPaid) {
-                        return showPaid;
-                    } 
-                    // Se o título está em aberto
-                    else {
-                        if (dueDate) {
-                            if (dueDate <= currentDate) {
-                                return onlyOverdue;
-                            } else {
-                                return showFuture;
-                            }
-                        } else {
-                            // Se não tem data de vencimento, considerar como vencido
-                            return onlyOverdue;
-                        }
-                    }
-                });
-
-                // Aplicar filtro de data
-                if (dateFilterActive) {
-                    clientTitles = clientTitles.filter(title => {
-                        const dueDate = serialToDate(title.venc);
-                        const liqDate = serialToDate(title.liq);
-                        const isPaid = title.liq && liqDate;
-                        const titleDate = isPaid ? liqDate : dueDate;
-                        return isDateInRange(titleDate, startDateFilter, endDateFilter);
-                    });
-                }
-
-                // Novo: Aplicar filtro de empresa
-                if (selectedCompanies.size > 0) {
-                    clientTitles = clientTitles.filter(title => {
-                        const company = title.emissora || 'Não informada';
-                        return selectedCompanies.has(company);
-                    });
-                }
-
-                clientTitles.forEach(title => {
-                    const dueStr = serialToDate(title.venc) ? serialToDate(title.venc).toLocaleDateString('pt-BR') : 'N/A';
-                    const valorNum = Number(title.valor || 0);
-                    const status = isTitleOpen(title) ? 'Aberto' : 'Quitado';
-                    allData.push([client, title.desc, title.emissora, dueStr, valorNum, status]);
-                });
-            }
-
-            const ws = XLSX.utils.aoa_to_sheet(allData);
-
-            // Ajuste de colunas para melhorar leitura (larguras em caracteres aproximados)
-            ws['!cols'] = [
-                { wch: 30 }, // Cliente
-                { wch: 50 }, // Descrição
-                { wch: 40 }, // Empresa
-                { wch: 15 }, // Vencimento
-                { wch: 15 }, // Valor
-                { wch: 12 }  // Status
-            ];
-
-            // Tentar aplicar wrapText nas colunas Descrição and Empresa
-            try {
-                for (let r = 1; r < allData.length; r++) {
-                    const descCellAddr = `B${r + 1}`;
-                    const empCellAddr = `C${r + 1}`;
-                    if (ws[descCellAddr]) {
-                        ws[descCellAddr].s = ws[descCellAddr].s || {};
-                        ws[descCellAddr].s.alignment = ws[descCellAddr].s.alignment || {};
-                        ws[descCellAddr].s.alignment.wrapText = true;
-                    }
-                    if (ws[empCellAddr]) {
-                        ws[empCellAddr].s = ws[empCellAddr].s || {};
-                        ws[empCellAddr].s.alignment = ws[empCellAddr].s.alignment || {};
-                        ws[empCellAddr].s.alignment.wrapText = true;
-                    }
-                }
-            } catch (e) {
-                console.warn('Não foi possível aplicar estilos de célula no XLSX (wrap).', e);
-            }
-
-            // Formatar coluna Valor como número (para permitir que o Excel entenda)
-            try {
-                for (let r = 1; r < allData.length; r++) {
-                    const valAddr = `E${r + 1}`;
-                    if (ws[valAddr]) {
-                        const num = typeof ws[valAddr].v === 'number' ? ws[valAddr].v : parseFloat(String(ws[valAddr].v).toString().replace(/[^\d.-]/g, '').replace(',', '.'));
-                        ws[valAddr].v = isNaN(num) ? ws[valAddr].v : num;
-                        ws[valAddr].t = 'n';
-                        ws[valAddr].z = '"R$"#,##0.00';
-                    }
-                }
-            } catch (e) {
-                console.warn('Não foi possível aplicar formatação numérica no XLSX.', e);
-            }
-
-            XLSX.utils.book_append_sheet(wb, ws, 'Títulos em Aberto');
-            XLSX.writeFile(wb, `relatorio_titulos_aberto_${currentDate.toISOString().split('T')[0]}.xlsx`);
-        }
-
-        document.addEventListener('click', function(e) {
-            const dropdown = document.getElementById('autocompleteDropdown');
-            const input = document.getElementById('searchInput');
-            if (!input.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.style.display = 'none';
-            }
-        });
-
-        // Adicionei exemplos de dados para demonstração
-        window.selectClient = selectClient;
-        window.downloadPDF = downloadPDF;
-        window.editRecord = editRecord;
-        window.deleteRecord = deleteRecord;
-    </script>
-</body>
-</html>
